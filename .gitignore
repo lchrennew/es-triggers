@@ -1,0 +1,10 @@
+node_modules
+stats
+coverage
+yarn.lock
+package-lock.json
+.directory
+
+*.local
+*.log
+*.tgz
