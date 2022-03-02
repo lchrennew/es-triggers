@@ -9,11 +9,11 @@ const filepath = domainModel => `{model}:${domainModel.kind}:${domainModel.name}
  * @param domainModel {DomainModel}
  * @return {Promise<void>}
  */
-export const save = domainModel =>
-    redis.set(filepath(domainModel), dump(domainModel))
+export const save = domainModel => redis.set(filepath(domainModel), dump(domainModel))
 
 export const remove = domainModel => redis.unlink(filepath(domainModel))
 
+export const removeByName = (kind, name) => redis.unlink(filepath({ kind, name }))
 
 export const get = async (type, name) => {
     const content = await redis.get(filepath({ kind: type.kind, name }))

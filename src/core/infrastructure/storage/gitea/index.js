@@ -17,6 +17,7 @@ export const save = (domainModel, operator) =>
 
 export const remove = (domainModel, operator) => deleteFile(owner, repo, filepath(domainModel), operator)
 
+export const removeByName = (kind, name, operator) => deleteFile(owner, repo, filepath({ kind, name }), operator)
 
 export const get = async (type, name) => {
     const content = await readFile(owner, repo, filepath({ kind: type.kind, name }))

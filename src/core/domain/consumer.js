@@ -1,6 +1,5 @@
-import { get, getAll, remove, save } from "../infrastructure/storage/index.js";
+import { get, getAll, remove, removeByName, save } from "../infrastructure/storage/index.js";
 import { DomainModel } from "./domain-model.js";
-import { TargetSystem } from "./target-system.js";
 
 export default class Consumer {
     username;
@@ -21,19 +20,21 @@ export default class Consumer {
     /**
      *
      * @param domainModel {DomainModel}
-     * @return {Promise<void>}
+     * @return {Promise<*>}
      */
     async delete(domainModel) {
-        await remove(domainModel, this.username)
+        return await remove(domainModel, this.username)
     }
 
-    async viewTargetSystems() {
-        return await getAll(TargetSystem.kind)
+    async deleteByName(type, name) {
+        return await removeByName(type.kind, name, this.username)
     }
 
-    async viewTargetSystem(name) {
-        return await get(TargetSystem.kind, name)
+    async viewAll(type) {
+        return await getAll(type.kind)
     }
 
-
+    async view(type, name) {
+        return await get(type.kind, name)
+    }
 }
