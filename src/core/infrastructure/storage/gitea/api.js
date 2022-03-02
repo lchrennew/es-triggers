@@ -2,6 +2,7 @@ import * as gitea from '../../../utils/gitea.js'
 import { params } from '../../../utils/gitea.js'
 import { json } from "es-fetch-api";
 import { DELETE, POST, PUT } from "es-fetch-api/middlewares/methods.js";
+import { encodeBase64 } from "../../../../utils/encode.js";
 
 export const createOrgRepository = (owner, name) =>
     gitea.api(`orgs/:owner/repos`, POST, params({ owner }),
@@ -29,15 +30,16 @@ export const createFile = (owner, repo, filepath, content, operator) =>
 
 export const saveFile = async (owner, repo, filepath, content, operator) => {
     let file
+    const base64 = encodeBase64(content)
     try {
         file = await getFile(owner, repo, filepath)
     } catch (error) {
         if (error.status === 404) {
-            await createFile(owner, repo, filepath, content, operator)
+            await createFile(owner, repo, filepath, base64, operator)
         } else throw error
     }
     if (file.sha) {
-        await updateFile(owner, repo, filepath, content, file.sha, operator)
+        await updateFile(owner, repo, filepath, base64, file.sha, operator)
     }
 }
 

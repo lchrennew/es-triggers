@@ -1,4 +1,4 @@
-import { get, getAll, remove, save } from "../infrastructure/index.js";
+import { get, getAll, remove, save } from "../infrastructure/storage/index.js";
 import { DomainModel } from "./domain-model.js";
 import { TargetSystem } from "./target-system.js";
 

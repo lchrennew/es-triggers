@@ -1,9 +1,10 @@
 import { deleteFile, readAllDirectoryFiles, readFile, readFiles, saveFile } from "./api.js";
-import { DomainModel } from "../../domain/domain-model.js";
+import { DomainModel } from "../../../domain/domain-model.js";
+import { dump, format, load } from "../../presentation/index.js";
 
 const owner = process.env.GITEA_SHARED_OWNER
 const repo = process.env.GITEA_SHARED_REPO
-const filepath = domainModel => `${domainModel.kind}/${domainModel.name}.yaml`
+const filepath = domainModel => `${domainModel.kind}/${domainModel.name}.${format}`
 
 /**
  *
@@ -11,20 +12,18 @@ const filepath = domainModel => `${domainModel.kind}/${domainModel.name}.yaml`
  * @param operator {string}
  * @return {Promise<void>}
  */
-export const save = (domainModel, operator) => {
-    const content = domainModel.base64Yaml
-    return saveFile(owner, repo, filepath(domainModel), content, operator)
-}
+export const save = (domainModel, operator) =>
+    saveFile(owner, repo, filepath(domainModel), dump(domainModel), operator)
 
 export const remove = (domainModel, operator) => deleteFile(owner, repo, filepath(domainModel), operator)
 
 
 export const get = async (type, name) => {
-    const yaml = await readFile(owner, repo, filepath({ kind: type.kind, name }))
-    return DomainModel.fromYaml(yaml, type)
+    const content = await readFile(owner, repo, filepath({ kind: type.kind, name }))
+    return load(content, type)
 }
 
-const gets = (type, ...files) => files.map(yaml => DomainModel.fromYaml(yaml, type))
+const gets = (type, ...files) => files.map(content => load(content, type))
 
 export const getAll = async (type, path) => {
     const files = await readAllDirectoryFiles(owner, repo, [ type.kind, path ].join('/'))

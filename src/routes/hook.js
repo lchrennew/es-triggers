@@ -1,5 +1,5 @@
 import { Controller } from "koa-es-template";
-import { get } from "../core/infrastructure/index.js";
+import { get } from "../core/infrastructure/storage/index.js";
 import Listener from "../core/domain/listener.js";
 import ListenerRequested from "../core/domain/events/listener-requested.js";
 import ListenerInternalError from "../core/domain/events/listener-internal-error.js";

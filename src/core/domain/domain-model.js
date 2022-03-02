@@ -14,35 +14,8 @@ export class DomainModel {
         this.spec = spec;
     }
 
-    get json() {
-        return JSON.stringify(this)
-    }
-
-    get yaml() {
-        return dump(this)
-    }
-
-    get base64Yaml() {
-        return encodeBase64(this.yaml)
-    }
-
-    /**
-     *
-     * @param base64Yaml {string}
-     * @param type {Function}
-     * @return {*}
-     */
-    static fromBase64Yaml(base64Yaml, type) {
-        return this.fromYaml(decodeBase64(base64Yaml), type)
-    }
-
     static fromYaml(yaml, type) {
         const { name, metadata, spec } = load(yaml)
-        return new type(name, metadata, spec)
-    }
-
-    static fromJson(json, type) {
-        const { name, metadata, spec } = JSON.parse(json)
         return new type(name, metadata, spec)
     }
 }

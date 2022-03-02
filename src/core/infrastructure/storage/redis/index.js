@@ -1,29 +1,29 @@
-import { DomainModel } from "../../domain/domain-model.js";
-import { redis } from "../../../utils/redis.js";
+import { DomainModel } from "../../../domain/domain-model.js";
+import { redis } from "../../../../utils/redis.js";
+import { dump, load } from "../../presentation/index.js";
 
 const filepath = domainModel => `{model}:${domainModel.kind}:${domainModel.name}`
 
 /**
  *
  * @param domainModel {DomainModel}
- * @param operator {string}
  * @return {Promise<void>}
  */
 export const save = domainModel =>
-    redis.set(filepath(domainModel), domainModel.json)
+    redis.set(filepath(domainModel), dump(domainModel))
 
 export const remove = domainModel => redis.unlink(filepath(domainModel))
 
 
 export const get = async (type, name) => {
-    const json = await redis.get(filepath({ kind: type.kind, name }))
-    return DomainModel.fromJson(json, type)
+    const content = await redis.get(filepath({ kind: type.kind, name }))
+    return load(content, type)
 }
 
-const gets = (type, ...files) => files.map(json => DomainModel.fromYaml(json, type))
+const gets = (type, ...files) => files.map(content => load(content, type))
 
 export const getAll = async (type, path) => {
-    const files = await scanAll(`{model}:${type.kind}:${path}*`)
+    const files = await scanAll({ match: `{model}:${type.kind}:${path}*` })
     return gets(type, ...files)
 }
 

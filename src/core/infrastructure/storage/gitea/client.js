@@ -1,6 +1,6 @@
 import { getLogger } from "koa-es-template";
 import { getApi } from "es-fetch-api";
-import { encode } from "../../../utils/encode.js";
+import { encode } from "../../../../utils/encode.js";
 import { compile } from "path-to-regexp";
 
 const logger = getLogger('gitea')

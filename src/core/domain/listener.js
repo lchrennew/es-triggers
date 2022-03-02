@@ -1,5 +1,5 @@
 import { DomainModel } from "./domain-model.js";
-import { getAllByNames } from "../infrastructure/index.js";
+import { getAllByNames } from "../infrastructure/storage/index.js";
 import Trigger from "./trigger.js";
 import TriggerInternalError from "./events/trigger-internal-error.js";
 

@@ -1,5 +1,5 @@
 import { DomainModel } from "./domain-model.js";
-import { get, getAll } from "../infrastructure/index.js";
+import { get, getAll } from "../infrastructure/storage/index.js";
 import Binding from "./binding.js";
 import { TargetSystem } from "./target-system.js";
 import Template from "./template.js";
