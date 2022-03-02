@@ -1,75 +1,38 @@
-import * as gitea from '../../../utils/gitea.js'
-import { params } from '../../../utils/gitea.js'
-import { json } from "es-fetch-api";
-import { DELETE, POST, PUT } from "es-fetch-api/middlewares/methods.js";
+import { deleteFile, readAllDirectoryFiles, readFile, readFiles, saveFile } from "./api.js";
+import { DomainModel } from "../../domain/domain-model.js";
 
-export const createOrgRepository = (owner, name) =>
-    gitea.api(`orgs/:owner/repos`, POST, params({ owner }),
-        json({ auto_init: true, default_branch: "main", name, private: false, template: false }))
+const owner = process.env.GITEA_SHARED_OWNER
+const repo = process.env.GITEA_SHARED_REPO
+const filepath = domainModel => `${domainModel.kind}/${domainModel.name}.yaml`
 
-const fileEndpoint = `repos/:owner/:repo/contents/:filepath`;
-
-export const getFile = (owner, repo, filepath) =>
-    gitea.api(fileEndpoint, params({ owner, repo, filepath }))
-
-export const updateFile = (owner, repo, filepath, content, sha, operator) =>
-    gitea.api(
-        fileEndpoint,
-        PUT,
-        params({ owner, repo, filepath }),
-        json({ content, sha, message: `${operator} updated ${filepath}` }))
-
-export const createFile = (owner, repo, filepath, content, operator) =>
-    gitea.api(
-        fileEndpoint,
-        POST,
-        params({ owner, repo, filepath }),
-        json({ content, message: `${operator} updated ${filepath}` })
-    )
-
-export const saveFile = async (owner, repo, filepath, content, operator) => {
-    let file
-    try {
-        file = await getFile(owner, repo, filepath)
-    } catch (error) {
-        if (error.status === 404) {
-            await createFile(owner, repo, filepath, content, operator)
-        } else throw error
-    }
-    if (file.sha) {
-        await updateFile(owner, repo, filepath, content, file.sha, operator)
-    }
+/**
+ *
+ * @param domainModel {DomainModel}
+ * @param operator {string}
+ * @return {Promise<void>}
+ */
+export const save = (domainModel, operator) => {
+    const content = domainModel.base64Yaml
+    return saveFile(owner, repo, filepath(domainModel), content, operator)
 }
 
-export const deleteFile = async (owner, repo, filepath, operator) => {
-    let { sha } = await getFile(owner, repo, filepath)
-    await gitea.api(
-        fileEndpoint,
-        DELETE,
-        params({ owner, repo, filepath }), json({ sha, message: `${operator} deleted ${filepath}` }))
+export const remove = (domainModel, operator) => deleteFile(owner, repo, filepath(domainModel), operator)
+
+
+export const get = async (type, name) => {
+    const yaml = await readFile(owner, repo, filepath({ kind: type.kind, name }))
+    return DomainModel.fromYaml(yaml, type)
 }
 
-export const readFile = async (owner, repo, filepath) =>
-    gitea.api(`repos/:owner/:repo/raw/:filepath`,
-        params({ owner, repo, filepath }))
+const gets = (type, ...files) => files.map(yaml => DomainModel.fromYaml(yaml, type))
 
-export const getBlob = async (owner, repo, sha) =>
-    gitea.api('repos/:owner/:repo/git/blobs/:sha', params({ owner, repo, sha }))
-
-export const readAllDirectoryFiles = async (owner, repo, filepath) => {
-    const queue = [ filepath ]
-    const files = []
-    while (queue.length) {
-        const [ ...paths ] = queue
-        queue.length = 0
-        await Promise.all(paths.map(async currentPath => {
-            const entries = await getFile(owner, repo, currentPath).catch(() => [])
-            files.push(...entries.filter(({ type }) => type === 'file').map(({ path }) => path))
-            queue.push(...entries.filter(({ type }) => type === 'dir').map(({ path }) => path))
-        }))
-    }
-    return readFiles(owner, repo, ...files)
+export const getAll = async (type, path) => {
+    const files = await readAllDirectoryFiles(owner, repo, [ type.kind, path ].join('/'))
+    return gets(type, ...files)
 }
 
-export const readFiles = async (owner, repo, ...paths) => Promise.all(paths.map(path => readFile(owner, repo, path)))
-
+export const getAllByNames = async (type, ...names) => {
+    const paths = names.map(name => filepath({ kind: type.kind, name }))
+    const files = await readFiles(owner, repo, ...paths)
+    return gets(type, ...files)
+}

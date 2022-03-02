@@ -40,4 +40,9 @@ export class DomainModel {
         const { name, metadata, spec } = load(yaml)
         return new type(name, metadata, spec)
     }
+
+    static fromJson(json, type) {
+        const { name, metadata, spec } = JSON.parse(json)
+        return new type(name, metadata, spec)
+    }
 }
