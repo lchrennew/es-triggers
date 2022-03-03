@@ -1,5 +1,5 @@
-import * as gitea from '../../../utils/gitea.js'
-import { params } from '../../../utils/gitea.js'
+import * as gitea from './client.js'
+import { params } from './client.js'
 import { json } from "es-fetch-api";
 import { DELETE, POST, PUT } from "es-fetch-api/middlewares/methods.js";
 import { encodeBase64 } from "../../../../utils/encode.js";
@@ -38,7 +38,7 @@ export const saveFile = async (owner, repo, filepath, content, operator) => {
             await createFile(owner, repo, filepath, base64, operator)
         } else throw error
     }
-    if (file.sha) {
+    if (file?.sha) {
         await updateFile(owner, repo, filepath, base64, file.sha, operator)
     }
 }

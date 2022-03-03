@@ -27,9 +27,10 @@ class Domains extends Controller {
     async save(ctx) {
         const consumer = new Consumer(ctx.state.username)
         const { name } = ctx.params
-        const model = ctx.request.body
+        const { metadata, spec } = ctx.request.body
         const type = this.type
-        ctx.body = await consumer.save(new type({ ...model, name }))
+        await consumer.save(new type(name, metadata, spec))
+        ctx.body = { ok: true }
     }
 
     async remove(ctx) {

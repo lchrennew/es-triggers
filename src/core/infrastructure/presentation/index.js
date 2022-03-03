@@ -2,5 +2,8 @@ export const format = process.env.PRESENTATION_FORMAT ?? 'yaml'
 
 const { parse, stringify } = await import(`./${format}.js`)
 
-export const load = (content, type) => new type(parse(content))
+export const load = (content, type) => {
+    const { name, metadata, spec } = parse(content)
+    return new type(name, metadata, spec);
+}
 export const dump = obj => stringify(obj)

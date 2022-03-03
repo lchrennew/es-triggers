@@ -31,10 +31,10 @@ export default class Consumer {
     }
 
     async viewAll(type) {
-        return await getAll(type.kind)
+        return await getAll(type)
     }
 
     async view(type, name) {
-        return await get(type.kind, name)
+        return await get(type, name)
     }
 }
