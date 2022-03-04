@@ -1,31 +1,34 @@
-import * as gitea from './client.js'
-import { params } from './client.js'
-import { json } from "es-fetch-api";
+import * as github from './clients/index.js'
+import { params } from './clients/index.js'
+import { json } from "es-fetch-api/middlewares/body.js";
 import { DELETE, POST, PUT } from "es-fetch-api/middlewares/methods.js";
-import { encodeBase64 } from "../../../../utils/encode.js";
+import { decodeBase64, encodeBase64 } from "../../../../utils/encode.js";
+import * as apiPath from "./api-path.js";
 
 export const createOrgRepository = (owner, name) =>
-    gitea.api(`orgs/:owner/repos`, POST, params({ owner }),
+    github.api(`orgs/:owner/repos`, POST, params({ owner }),
         json({ auto_init: true, default_branch: "main", name, private: false, template: false }))
 
-const fileEndpoint = `repos/:owner/:repo/contents/:filepath`;
+export const getFile = async (owner, repo, filepath) => {
+    const data = await github.api(apiPath.contents, params({ owner, repo, filepath }));
+    if (data instanceof Array && !data.length) throw { status: 404, message: 'file not found' }
+    return data
+}
 
-export const getFile = (owner, repo, filepath) =>
-    gitea.api(fileEndpoint, params({ owner, repo, filepath }))
 
 export const updateFile = (owner, repo, filepath, content, sha, operator) =>
-    gitea.api(
-        fileEndpoint,
+    github.api(
+        apiPath.contents,
         PUT,
         params({ owner, repo, filepath }),
         json({ content, sha, message: `${operator} updated ${filepath}` }))
 
 export const createFile = (owner, repo, filepath, content, operator) =>
-    gitea.api(
-        fileEndpoint,
+    github.api(
+        apiPath.contents,
         POST,
         params({ owner, repo, filepath }),
-        json({ content, message: `${operator} updated ${filepath}` })
+        json({ content, message: `${operator} created ${filepath}` })
     )
 
 export const saveFile = async (owner, repo, filepath, content, operator) => {
@@ -45,18 +48,19 @@ export const saveFile = async (owner, repo, filepath, content, operator) => {
 
 export const deleteFile = async (owner, repo, filepath, operator) => {
     let { sha } = await getFile(owner, repo, filepath)
-    await gitea.api(
-        fileEndpoint,
+    await github.api(
+        apiPath.contents,
         DELETE,
         params({ owner, repo, filepath }), json({ sha, message: `${operator} deleted ${filepath}` }))
 }
 
-export const readFile = async (owner, repo, filepath) =>
-    gitea.api(`repos/:owner/:repo/raw/:filepath`,
-        params({ owner, repo, filepath }))
+export const readFile = async (owner, repo, filepath) => {
+    const { content } = await getFile(owner, repo, filepath)
+    return decodeBase64(content)
+}
 
 export const getBlob = async (owner, repo, sha) =>
-    gitea.api('repos/:owner/:repo/git/blobs/:sha', params({ owner, repo, sha }))
+    github.api('repos/:owner/:repo/git/blobs/:sha', params({ owner, repo, sha }))
 
 export const readAllDirectoryFiles = async (owner, repo, filepath) => {
     const queue = [ filepath ]

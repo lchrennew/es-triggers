@@ -1,9 +1,8 @@
 import { deleteFile, readAllDirectoryFiles, readFile, readFiles, saveFile } from "./api.js";
 import { DomainModel } from "../../../domain/domain-model.js";
 import { dump, format, load } from "../../presentation/index.js";
+import { owner, repo } from './clients/index.js'
 
-const owner = process.env.GITEA_SHARED_OWNER
-const repo = process.env.GITEA_SHARED_REPO
 const filepath = domainModel => `${domainModel.kind}/${domainModel.name}.${format}`
 
 /**

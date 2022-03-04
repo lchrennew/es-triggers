@@ -13,7 +13,7 @@
     "nodemon": "^2.0.15"
   },
   "dependencies": {
-    "es-fetch-api": "^1.0.19",
+    "es-fetch-api": "^1.0.20",
     "es-ioredis-url": "^1.0.3",
     "es-object-id": "^1.0.0",
     "js-yaml": "^4.1.0",

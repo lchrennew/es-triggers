@@ -5,7 +5,9 @@ import { TargetSystem } from "./target-system.js";
 import Template from "./template.js";
 import SourceInterceptor from "./source-interceptor.js";
 import TargetInterceptor from "./target-interceptor.js";
-import { getApi, json, query } from "es-fetch-api";
+import { json } from "es-fetch-api/middlewares/body.js";
+import { query } from "es-fetch-api/middlewares/query.js";
+import { getApi } from 'es-fetch-api'
 import TargetRequest from "./target-request.js";
 import { POST } from "es-fetch-api/middlewares/methods.js";
 import TargetSystemRequested from "./events/target-system-requested.js";
