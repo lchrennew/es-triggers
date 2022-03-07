@@ -40,7 +40,7 @@ export default class Storage {
      * 获取路径下的所有对象
      * @param type
      * @param path
-     * @return {Promise<void>}
+     * @return {Promise<*>}
      */
     async getsByPath(type, path) {
     }

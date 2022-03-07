@@ -113,5 +113,12 @@ export const readTreeFiles = async (owner, repo, dir = '') => {
     return await Promise.all(treeFiles.map(({ sha }) => readBlob(owner, repo, sha)))
 }
 
+export const getTreeFilePaths = async (owner, repo, dir = '') => {
+    const tree = await getRootTree(owner, repo)
+    const treeFiles = await getTreeFiles(tree, dir)
+    return treeFiles.map(({ path }) => path)
+}
+
+
 export const readFiles = async (owner, repo, ...paths) => Promise.all(paths.map(path => readFile(owner, repo, path)))
 

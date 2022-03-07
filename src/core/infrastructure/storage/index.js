@@ -80,10 +80,11 @@ const fallback = (type, storage = defaultStorage) => path => {
  * @param cache
  * @return {Promise<*[]>}
  */
-export const getAll = async (type, path,
+export const getAll = async (type, path = '',
                              storage = defaultStorage, cache = defaultCache) => {
+    logger.debug('getAll::args', type, path)
     const paths = await storage.getPathsByPath(type, path)
-    logger.debug('getAll paths', paths)
+    logger.debug('getAll::paths', paths)
     return cache.getsByPaths(paths, fallback(type, storage), type)
 }
 
