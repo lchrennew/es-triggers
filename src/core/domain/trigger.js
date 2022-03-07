@@ -5,13 +5,7 @@ import { TargetSystem } from "./target-system.js";
 import Template from "./template.js";
 import SourceInterceptor from "./source-interceptor.js";
 import TargetInterceptor from "./target-interceptor.js";
-import { json } from "es-fetch-api/middlewares/body.js";
-import { query } from "es-fetch-api/middlewares/query.js";
-import { getApi } from 'es-fetch-api'
 import TargetRequest from "./target-request.js";
-import { POST } from "es-fetch-api/middlewares/methods.js";
-import TargetSystemRequested from "./events/target-system-requested.js";
-import TargetSystemRequestedError from "./events/target-system-requested-error.js";
 
 export default class Trigger extends DomainModel {
     static kind = 'trigger'
@@ -75,106 +69,44 @@ export default class Trigger extends DomainModel {
         return this.#targetRequests ??= await getAll(TargetRequest, this.name)
     }
 
-    async process(sourceRequest) {
-        const sourceIntercepted = await this.interceptSource(sourceRequest);
+    async invoke(context) {
+        const sourceIntercepted = await this.interceptSource(context);
         if (sourceIntercepted) return
-        const variables = await this.bindVariables(sourceRequest);
-        await this.triggerAll({ ...sourceRequest, variables, });
-    }
-
-
-    async bindVariables(sourceRequest) {
-        const binding = await this.getBinding()
-        return await binding.bind({ ...sourceRequest, binding: binding.name, });
-    }
-
-    async interceptSource(sourceRequest) {
-        const sourceInterceptor = await this.getSourceInterceptor()
-        return sourceInterceptor.intercept({ ...sourceRequest, sourceInterceptor: sourceInterceptor.name });
-    }
-
-    async triggerAll(sourceRequest) {
+        const variables = await this.bindVariables(context);
         const targetRequests = await this.getTargetRequests()
+        await this.triggerAll(targetRequests, { ...context, variables, });
+    }
+
+    async bindVariables(context) {
+        const binding = await this.getBinding()
+        return await binding.bind({ ...context, binding: binding.name, });
+    }
+
+    async interceptSource(context) {
+        const sourceInterceptor = await this.getSourceInterceptor()
+        return sourceInterceptor.intercept({ ...context, sourceInterceptor: sourceInterceptor.name });
+    }
+
+    async triggerAll(targetRequests, context) {
         const targetInterceptor = await this.getTargetInterceptor()
         const targetSystem = await this.getTargetSystem()
         const template = await this.getTemplate()
 
-        await Promise.all(
-            targetRequests.map(targetRequest =>
-                this.trigger(
+        targetRequests.forEach(
+            targetRequest =>
+                targetRequest.trigger(
                     {
-                        ...sourceRequest,
+                        ...context,
                         props: targetRequest.spec.props,
                         targetRequest: targetRequest.name,
                         targetInterceptor: targetInterceptor.name,
                         targetSystem: targetSystem.name,
                         template: template.name,
                     },
-                    targetRequest,
                     targetInterceptor,
                     targetSystem,
                     template,
                 ))
-        )
     }
 
-    async trigger(sourceRequest, targetRequest, targetInterceptor, targetSystem, template) {
-        const targetIntercepted = await targetInterceptor.intercept(sourceRequest)
-        targetIntercepted || await this.requestTargetSystem(targetRequest, sourceRequest, targetSystem, template);
-    }
-
-
-    async requestTargetSystem(targetRequest, sourceRequest, targetSystem, template) {
-        const variables = await targetRequest.bind(sourceRequest)
-        const request = template.apply(variables)
-        const baseURL = targetSystem.getUrl(variables)
-        await this.post(baseURL, request, sourceRequest)
-    }
-
-    async post(baseURL, request, sourceRequest) {
-        const api = getApi(baseURL)
-        const headers = obj => async (ctx, next) => {
-            ctx.headers = { ...ctx.headers, obj }
-            return next()
-        }
-        try {
-            const apiResponse =
-                await api(
-                    request.path,
-                    POST,
-                    query(request.query),
-                    headers(request.headers),
-                    headers({ 'X-TRIGGER-EVENT-ID': sourceRequest.eventID }),
-                    json(request.body))
-
-            const response = await this.responseToObject(apiResponse);
-            this.onFinished(sourceRequest, { request, response })
-        } catch (error) {
-            this.onRequestError(sourceRequest, error);
-        }
-    }
-
-    onRequestError(sourceRequest, error) {
-        const targetSystemRequestedError = new TargetSystemRequestedError(sourceRequest, error)
-        targetSystemRequestedError.flush()
-    }
-
-    async responseToObject(response) {
-        const { headers, ok, redirected, status, statusText, url } = response
-        const body = await response.text()
-        return {
-            ok,
-            redirected,
-            status,
-            statusText,
-            url,
-            headers: Object.fromEntries(headers.entries()),
-            body
-        }
-    }
-
-    onFinished(sourceRequest, result) {
-        const targetSystemRequested = new TargetSystemRequested(sourceRequest, result)
-        targetSystemRequested.flush()
-    }
 }

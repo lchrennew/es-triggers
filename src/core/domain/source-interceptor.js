@@ -12,29 +12,29 @@ export default class SourceInterceptor extends DomainModel {
 
     /**
      *
-     * @param sourceRequest
+     * @param context
      * @return {Promise<boolean>}
      */
-    async intercept(sourceRequest) {
+    async intercept(context) {
         try {
             const script = `async ({method,headers,body,query,listener, trigger})=>{${this.spec.script}}`
             const { intercept } = await importNamespace(exportName('intercept', script))
-            const intercepted = await intercept(sourceRequest)
-            intercepted && this.onIntercepted(sourceRequest);
+            const intercepted = await intercept(context)
+            intercepted && this.onIntercepted(context);
             return intercepted
         } catch (error) {
-            this.onError(sourceRequest, error);
+            this.onError(context, error);
         }
         return true
     }
 
-    onError(sourceRequest, error) {
-        const sourceInterceptorInternalError = new SourceInterceptorInternalError(sourceRequest, error)
+    onError(context, error) {
+        const sourceInterceptorInternalError = new SourceInterceptorInternalError(context, error)
         sourceInterceptorInternalError.flush()
     }
 
-    onIntercepted(sourceRequest) {
-        const sourceRequestIntercepted = new SourceRequestIntercepted(sourceRequest)
+    onIntercepted(context) {
+        const sourceRequestIntercepted = new SourceRequestIntercepted(context)
         sourceRequestIntercepted.flush()
     }
 }

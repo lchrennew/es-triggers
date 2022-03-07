@@ -10,4 +10,8 @@ export class DomainModel {
         this.name = name;
         this.spec = spec;
     }
+
+    toString() {
+        return `${this.kind} ${this.name}`
+    }
 }

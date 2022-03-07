@@ -24,17 +24,17 @@ export default class Listener extends DomainModel {
         return getAllByNames(Trigger, this.spec.triggers)
     }
 
-    async invoke(sourceRequest) {
+    async invoke(context) {
         const triggers = await this.getTriggers()
         triggers.forEach(
-            trigger => trigger.process({ ...sourceRequest, trigger: trigger.name })
-                .catch(this.onError(sourceRequest, trigger))
+            trigger => trigger.invoke({ ...context, trigger: trigger.name })
+                .catch(this.onError(context, trigger))
         )
     }
 
-    onError(sourceRequest, trigger) {
+    onError(context, trigger) {
         return error => {
-            const triggerInternalError = new TriggerInternalError({ ...sourceRequest, trigger: trigger.name }, error)
+            const triggerInternalError = new TriggerInternalError({ ...context, trigger: trigger.name }, error)
             triggerInternalError.flush()
         };
     }

@@ -19,33 +19,33 @@ export default class Hook extends Controller {
         const body = ctx.request.body
         const { headers, method, query } = ctx.request
 
-        const sourceRequest = { listener: name, method, query, headers, body }
-        const eventID = this.onRequestIn(sourceRequest);
-        this.invokeListener(name, { ...sourceRequest, eventID }).catch(() => false);
+        const context = { listener: name, method, query, headers, body }
+        const eventID = this.onRequestIn(context);
+        this.invokeListener(name, { ...context, eventID }).catch(() => false);
         ctx.body = { ok: true, eventID }
     }
 
-    async invokeListener(name, sourceRequest) {
-        const listener = await get(Listener, name).catch(this.onListenerNotFound(sourceRequest))
-        listener?.invoke(sourceRequest).catch(this.onListenerInternalError(sourceRequest))
+    async invokeListener(name, context) {
+        const listener = await get(Listener, name).catch(this.onListenerNotFound(context))
+        listener?.invoke(context).catch(this.onListenerInternalError(context))
     }
 
-    onRequestIn(sourceRequest) {
-        const listenerRequested = new ListenerRequested(sourceRequest)
+    onRequestIn(context) {
+        const listenerRequested = new ListenerRequested(context)
         listenerRequested.flush()
         return listenerRequested.eventID
     }
 
-    onListenerInternalError(sourceRequest) {
+    onListenerInternalError(context) {
         return error => {
-            const listenerError = new ListenerInternalError(sourceRequest, error)
+            const listenerError = new ListenerInternalError(context, error)
             listenerError.flush()
         };
     }
 
-    onListenerNotFound(sourceRequest) {
+    onListenerNotFound(context) {
         return error => {
-            const listenerNotFound = new ListenerNotFound(sourceRequest, error)
+            const listenerNotFound = new ListenerNotFound(context, error)
             listenerNotFound.flush()
         };
     }

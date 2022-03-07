@@ -1,6 +1,9 @@
 import { DomainModel } from "./domain-model.js";
 import { exportName, importNamespace } from "../../utils/imports.js";
 import TargetRequestInternalError from "./events/target-request-internal-error.js";
+import { getLogger } from "koa-es-template";
+
+const logger = getLogger('target-request.js')
 
 export default class TargetRequest extends DomainModel {
     static kind = 'target-request'
@@ -24,5 +27,24 @@ export default class TargetRequest extends DomainModel {
     onError(sourceEvent, error) {
         const targetRequestInternalError = new TargetRequestInternalError(sourceEvent, error)
         targetRequestInternalError.flush()
+    }
+
+    /**
+     *
+     * @param context
+     * @param targetInterceptor
+     * @param targetSystem
+     * @param template
+     * @return {Promise<void>}
+     */
+    async trigger(context, targetInterceptor, targetSystem, template,) {
+        const targetIntercepted = await targetInterceptor.intercept(context)
+        targetIntercepted || await this.sendTo(targetSystem, context, template);
+    }
+
+    async sendTo(targetSystem, context, template) {
+        const variables = await this.bind(context)
+        const request = template.apply(variables)
+        targetSystem.commit(request, { ...context, variables })
     }
 }

@@ -18,6 +18,7 @@ export default class Consumer {
      * @return {Promise<void>}
      */
     save(domainModel, storage = defaultStorage) {
+        logger.info(`consumer ${this.username} saved ${domainModel}.`)
         return storage.save(domainModel, this.username)
     }
 
@@ -28,6 +29,7 @@ export default class Consumer {
      * @return {Promise<*>}
      */
     delete(domainModel, storage = defaultStorage) {
+        logger.info(`consumer ${this.username} delete ${domainModel}.`)
         return storage.remove(domainModel, this.username)
     }
 
@@ -39,6 +41,7 @@ export default class Consumer {
      * @return {Promise<*>}
      */
     deleteByName(type, name, storage = defaultStorage) {
+        logger.info(`consumer ${this.username} saved ${type.kind} ${name}.`)
         return storage.removeByName(type.kind, name, this.username)
     }
 

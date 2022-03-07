@@ -14,29 +14,29 @@ export default class TargetInterceptor extends DomainModel {
     /**
      *
      * @return {Promise<void>}
-     * @param sourceRequest
+     * @param context
      */
-    async intercept(sourceRequest) {
+    async intercept(context) {
         try {
             const script = `async ({listener,trigger,props,variables,targetSystem})=>{\
             ${this.spec.script};\
             }`
             const { intercept } = await importNamespace(exportName('intercept', script))
-            const intercepted = await intercept(sourceRequest)
-            intercepted && this.onIntercepted(sourceRequest);
+            const intercepted = await intercept(context)
+            intercepted && this.onIntercepted(context);
             return intercepted
         } catch (error) {
-            this.onError(sourceRequest, error);
+            this.onError(context, error);
         }
     }
 
-    onError(sourceRequest, error) {
-        const targetInterceptorInternalError = new TargetInterceptorInternalError(sourceRequest, error)
+    onError(context, error) {
+        const targetInterceptorInternalError = new TargetInterceptorInternalError(context, error)
         targetInterceptorInternalError.flush()
     }
 
-    onIntercepted(sourceRequest) {
-        const targetRequestIntercepted = new TargetRequestIntercepted(sourceRequest)
+    onIntercepted(context) {
+        const targetRequestIntercepted = new TargetRequestIntercepted(context)
         targetRequestIntercepted.flush()
     }
 }
