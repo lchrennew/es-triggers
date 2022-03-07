@@ -5,6 +5,7 @@ export default class Cache {
     #cache = {}
 
     async get(path, type) {
+        this.logger.debug('get', path)
         return this.#cache[path];
     }
 
@@ -15,6 +16,7 @@ export default class Cache {
     }
 
     async getOrSet(path, fallback) {
+        this.logger.debug('getOrSet', path)
         return await this.get(path) ?? await this.set(path, await fallback(path));
     }
 

@@ -13,35 +13,47 @@ class RedisCache extends Cache {
     }
 
     async get(path, type) {
+        this.logger.debug('get::args', path, type)
         const key = this.getKey(path)
         const content = await redis.get(key)
-        return load(content, type)
+        this.logger.debug('get::key', key, content)
+        this.logger.debug(content)
+        return content ? load(content, type) : null
     }
 
     set(path, content) {
+        if (!content) return
+        this.logger.debug('set::args', path, content)
         const key = this.getKey(path)
-        return redis.set(key, dump(content));
+        this.logger.debug('set::key', key)
+        redis.set(key, dump(content));
+        return content
     }
 
     async getOrSet(path, fallback, type) {
-        const key = this.getKey(path)
-        return await this.get(key, type) ?? await this.set(key, await fallback(path));
+        this.logger.info('getOrSet::args', path, type)
+        return await this.get(path, type) ?? await this.set(path, await fallback(path));
     }
 
     async getsByPaths(paths, fallback, type) {
         const contents = []
-        for (const path of paths) contents.push(await this.getOrSet(path, fallback, type))
+        for (const path of paths) {
+            contents.push(await this.getOrSet(path, fallback, type))
+        }
         return contents
     }
 
     async getsInDir(dir, fallback, type) {
+        this.logger.debug('getsInDir', dir, type)
         const keys = await redis.keys(`${this.getKey(dir)}*`)
         const paths = keys.map(key => this.getPath(key))
+        this.logger.debug('getsInDir paths', ...paths)
         return await this.getsByPaths(paths, fallback, type)
     }
 
     remove(path) {
-        return delete this.#cache[path];
+        const key = this.getKey(path)
+        return redis.unlink(key)
     }
 
     async scanAll({ match, count }) {

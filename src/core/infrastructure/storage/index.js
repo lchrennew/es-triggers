@@ -61,7 +61,16 @@ export const get = (type, name,
     return cache.getOrSet(path, fallback(type, storage), type)
 }
 
-const fallback = (type, storage = defaultStorage) => path => storage.getByPath(type, path)
+/**
+ * 穿透缓存取单条数据
+ * @param type
+ * @param storage
+ * @return {function(*): Promise<*>}
+ */
+const fallback = (type, storage = defaultStorage) => path => {
+    logger.debug('fallback::args', type, path)
+    return storage.getByPath(path, type);
+}
 
 /**
  *
@@ -71,10 +80,11 @@ const fallback = (type, storage = defaultStorage) => path => storage.getByPath(t
  * @param cache
  * @return {Promise<*[]>}
  */
-export const getAll = (type, path,
-                       storage = defaultStorage, cache = defaultCache) => {
-    const dir = storage.getPath(type.kind, path)
-    return cache.getsInDir(dir, fallback(type, storage), type)
+export const getAll = async (type, path,
+                             storage = defaultStorage, cache = defaultCache) => {
+    const paths = await storage.getPathsByPath(type, path)
+    logger.debug('getAll paths', paths)
+    return cache.getsByPaths(paths, fallback(type, storage), type)
 }
 
 /**

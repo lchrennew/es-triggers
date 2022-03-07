@@ -1,6 +1,9 @@
 import { redis } from "../../../../utils/redis.js";
 import { dump, load } from "../../presentation/index.js";
 import ExternalStorage from "../external-storage.js";
+import { getLogger } from "koa-es-template";
+
+const logger = getLogger('RedisStorage')
 
 class RedisStorage extends ExternalStorage {
 
@@ -20,21 +23,21 @@ class RedisStorage extends ExternalStorage {
         return redis.unlink(path)
     }
 
-    async get(type, name) {
-        const content = await redis.get(this.getPath(type.kind, name))
-        return load(content, type)
+    async getByPath(path, type) {
+        logger.debug('getByPath::args')
+        const content = await redis.get(path)
+        logger.debug('getByPath::content', content)
+        return content ? load(content, type) : null
     }
 
-    async getByPath(type, path) {
+    async getsByPath(type, path) {
         const files = await this.scanAll({ match: this.getPath(type.kind, `${path}*`) })
         return this.gets(type, ...files)
     }
 
-    async getAllByNames(type, ...names) {
-        if (!names.length) return []
-        const paths = names.map(name => this.getPath(type.kind, name))
-        const files = await redis.mget(...paths)
-        return this.gets(type, ...files)
+    async getPathsByPath(type, path) {
+        const pattern = `${this.getPath(type.kind, path)}*`
+        return await redis.keys(pattern)
     }
 
     async scanAll({ match, count }) {

@@ -21,10 +21,10 @@ class GitHubStorage extends ExternalStorage {
     }
 
     get(type, name) {
-        return this.getByPath(type, this.getModelPath({ kind: type.kind, name }));
+        return this.getsByPath(type, this.getModelPath({ kind: type.kind, name }));
     }
 
-    async getByPath(type, path) {
+    async getsByPath(type, path) {
         const content = await readFile(owner, repo, path)
         return load(content, type)
     }
@@ -34,7 +34,7 @@ class GitHubStorage extends ExternalStorage {
         return this.gets(type, ...files)
     }
 
-    async getAllByNames(type, ...names) {
+    async getsByNames(type, ...names) {
         const paths = names.map(name => this.getModelPath({ kind: type.kind, name }))
         const files = await readFiles(owner, repo, ...paths)
         return this.gets(type, ...files)
