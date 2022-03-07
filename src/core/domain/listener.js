@@ -20,8 +20,8 @@ export default class Listener extends DomainModel {
      *
      * @return {Promise<Trigger[]>}
      */
-    async getTriggers() {
-        return await getAllByNames(Trigger, ...this.spec.triggers)
+    getTriggers() {
+        return getAllByNames(Trigger, this.spec.triggers)
     }
 
     async invoke(sourceRequest) {

@@ -1,5 +1,8 @@
-import { get, getAll, remove, removeByName, save } from "../infrastructure/storage/index.js";
+import * as defaultStorage from "../infrastructure/storage/index.js";
 import { DomainModel } from "./domain-model.js";
+import { getLogger } from "koa-es-template";
+
+const logger = getLogger('consumer')
 
 export default class Consumer {
     username;
@@ -11,30 +14,52 @@ export default class Consumer {
     /**
      *
      * @param domainModel {DomainModel}
+     * @param storage
      * @return {Promise<void>}
      */
-    async save(domainModel) {
-        await save(domainModel, this.username)
+    save(domainModel, storage = defaultStorage) {
+        return storage.save(domainModel, this.username)
     }
 
     /**
      *
      * @param domainModel {DomainModel}
+     * @param storage
      * @return {Promise<*>}
      */
-    async delete(domainModel) {
-        return await remove(domainModel, this.username)
+    delete(domainModel, storage = defaultStorage) {
+        return storage.remove(domainModel, this.username)
     }
 
-    async deleteByName(type, name) {
-        return await removeByName(type.kind, name, this.username)
+    /**
+     *
+     * @param type
+     * @param name
+     * @param storage
+     * @return {Promise<*>}
+     */
+    deleteByName(type, name, storage = defaultStorage) {
+        return storage.removeByName(type.kind, name, this.username)
     }
 
-    async viewAll(type) {
-        return await getAll(type)
+    /**
+     *
+     * @param type
+     * @param storage
+     * @return {Promise<*[]>}
+     */
+    viewAll(type, storage = defaultStorage) {
+        return storage.getAll(type)
     }
 
-    async view(type, name) {
-        return await get(type, name)
+    /**
+     *
+     * @param type
+     * @param name
+     * @param storage
+     * @return {Promise<*>}
+     */
+    view(type, name, storage = defaultStorage) {
+        return storage.get(type, name)
     }
 }

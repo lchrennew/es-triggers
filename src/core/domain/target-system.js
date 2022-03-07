@@ -8,7 +8,7 @@ export class TargetSystem extends DomainModel {
         super(TargetSystem.kind, name, { title }, { url });
     }
 
-    async getUrl(bindings) {
-        return exec(this.spec.url, bindings)
+    getUrl(variables) {
+        return exec(this.spec.url, variables)
     }
 }

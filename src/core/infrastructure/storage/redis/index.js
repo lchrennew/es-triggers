@@ -1,46 +1,53 @@
-import { DomainModel } from "../../../domain/domain-model.js";
 import { redis } from "../../../../utils/redis.js";
 import { dump, load } from "../../presentation/index.js";
+import ExternalStorage from "../external-storage.js";
 
-const filepath = domainModel => `{model}:${domainModel.kind}:${domainModel.name}`
+class RedisStorage extends ExternalStorage {
 
-/**
- *
- * @param domainModel {DomainModel}
- * @return {Promise<void>}
- */
-export const save = domainModel => redis.set(filepath(domainModel), dump(domainModel))
+    getModelPath(domainModel) {
+        return this.getPath(domainModel.kind, domainModel.name)
+    }
 
-export const remove = domainModel => redis.unlink(filepath(domainModel))
+    getPath(kind, path = '') {
+        return `{model:${kind}}:${path}`
+    }
 
-export const removeByName = (kind, name) => redis.unlink(filepath({ kind, name }))
+    save(domainModel) {
+        return redis.set(this.getModelPath(domainModel), dump(domainModel))
+    }
 
-export const get = async (type, name) => {
-    const content = await redis.get(filepath({ kind: type.kind, name }))
-    return load(content, type)
+    remove(path) {
+        return redis.unlink(path)
+    }
+
+    async get(type, name) {
+        const content = await redis.get(this.getPath(type.kind, name))
+        return load(content, type)
+    }
+
+    async getByPath(type, path) {
+        const files = await this.scanAll({ match: this.getPath(type.kind, `${path}*`) })
+        return this.gets(type, ...files)
+    }
+
+    async getAllByNames(type, ...names) {
+        if (!names.length) return []
+        const paths = names.map(name => this.getPath(type.kind, name))
+        const files = await redis.mget(...paths)
+        return this.gets(type, ...files)
+    }
+
+    async scanAll({ match, count }) {
+        let cursor = '0'
+        const result = []
+        do {
+            const [ nextCursor, values ] = await redis.scan(cursor, ...(match ? [ 'MATCH', match ] : []), ...(count ? [ 'COUNT', count ] : []))
+            cursor = nextCursor
+            result.push(...values)
+        } while (cursor !== '0')
+        return result
+    }
+
 }
 
-const gets = (type, ...files) => files.map(content => load(content, type))
-
-export const getAll = async (type, path) => {
-    const files = await scanAll({ match: `{model}:${type.kind}:${path}*` })
-    return gets(type, ...files)
-}
-
-export const getAllByNames = async (type, ...names) => {
-    if (!names.length) return []
-    const paths = names.map(name => filepath({ kind: type.kind, name }))
-    const files = await redis.mget(...paths)
-    return gets(type, ...files)
-}
-
-const scanAll = async ({ match, count }) => {
-    let cursor = '0'
-    const result = []
-    do {
-        const [ nextCursor, values ] = await redis.scan(cursor, ...(match ? [ 'MATCH', match ] : []), ...(count ? [ 'COUNT', count ] : []))
-        cursor = nextCursor
-        result.push(...values)
-    } while (cursor !== '0')
-    return result
-}
+export { RedisStorage as Storage }

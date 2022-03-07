@@ -126,8 +126,8 @@ export default class Trigger extends DomainModel {
 
     async requestTargetSystem(targetRequest, sourceRequest, targetSystem, template) {
         const variables = await targetRequest.bind(sourceRequest)
-        const request = await template.apply(variables)
-        const baseURL = await targetSystem.getUrl(variables)
+        const request = template.apply(variables)
+        const baseURL = targetSystem.getUrl(variables)
         await this.post(baseURL, request, sourceRequest)
     }
 

@@ -9,7 +9,7 @@ export default class Template extends DomainModel {
         super(Template.kind, name, { title }, { path, headers, body, query });
     }
 
-    async apply(bindings) {
+    apply(bindings) {
         const spec = JSON.parse(JSON.stringify(this.spec))
         traversal(spec, (parent, key, value) => {
             if (parent && key && value?.constructor.name === 'String')

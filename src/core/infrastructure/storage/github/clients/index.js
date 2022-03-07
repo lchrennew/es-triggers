@@ -10,12 +10,15 @@ const { auth, baseUrl, repo, owner } = await import(`./${vendor}.js`)
 
 const _ = getApi(baseUrl)
 
-export const params = params => async (ctx, next) => {
-    const toPath = compile(ctx.url.pathname, { encode: encodeURIComponent })
+export const useParams = params => async (ctx, next) => {
+    const toPath = compile(ctx.url.pathname, { validate: false })
     ctx.url.pathname = toPath(params)
     return await next()
 }
-
+export const log = async (ctx, next) => {
+    logger.debug(ctx.method, ctx.url.href)
+    return await next()
+}
 /**
  * 简单调用Gitee API
  * @param endpoint
@@ -23,7 +26,7 @@ export const params = params => async (ctx, next) => {
  * @return {Promise<undefined|*>}
  */
 export const api = async (endpoint, ...args) => {
-    const response = await _(endpoint, ...args, auth)
+    const response = await _(endpoint, ...args, auth, log)
     if (response.status < 400) {
         return response.status === 204 ? undefined : getBody(response).catch(error => {
             logger.error(error)
