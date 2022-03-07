@@ -26,7 +26,6 @@ const defaultStorage = new Storage()
  */
 export const save = async (domainModel, operator,
                            storage = defaultStorage, cache = defaultCache) => {
-    logger.debug('save')
     const result = await storage.save(domainModel, operator)
     await cache.set(storage.getModelPath(domainModel), domainModel)
     return result
@@ -67,10 +66,7 @@ export const get = (type, name,
  * @param storage
  * @return {function(*): Promise<*>}
  */
-const fallback = (type, storage = defaultStorage) => path => {
-    logger.debug('fallback::args', type, path)
-    return storage.getByPath(path, type);
-}
+const fallback = (type, storage = defaultStorage) => path => storage.getByPath(path, type)
 
 /**
  *
@@ -82,9 +78,7 @@ const fallback = (type, storage = defaultStorage) => path => {
  */
 export const getAll = async (type, path = '',
                              storage = defaultStorage, cache = defaultCache) => {
-    logger.debug('getAll::args', type, path)
     const paths = await storage.getPathsByPath(type, path)
-    logger.debug('getAll::paths', paths)
     return cache.getsByPaths(paths, fallback(type, storage), type)
 }
 

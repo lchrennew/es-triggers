@@ -4,8 +4,8 @@ import { compile } from "path-to-regexp";
 
 const vendor = process.env.GITHUB_LIKE_VENDOR
 
-const logger = getLogger(vendor)
-
+const logger = getLogger('GitHub Client')
+logger.debug(`Loading GitHub Storage Client Implement: ${vendor}`)
 const { auth, baseUrl, repo, owner } = await import(`./${vendor}.js`)
 
 const _ = getApi(baseUrl)
@@ -15,10 +15,7 @@ export const useParams = params => async (ctx, next) => {
     ctx.url.pathname = toPath(params)
     return await next()
 }
-export const log = async (ctx, next) => {
-    logger.debug(ctx.method, ctx.url.href)
-    return await next()
-}
+
 /**
  * 简单调用Gitee API
  * @param endpoint
@@ -26,7 +23,11 @@ export const log = async (ctx, next) => {
  * @return {Promise<undefined|*>}
  */
 export const api = async (endpoint, ...args) => {
-    const response = await _(endpoint, ...args, auth, log)
+    const t0 = process.hrtime.bigint()
+    const response = await _(endpoint, ...args, auth)
+    const t1 = process.hrtime.bigint()
+    const context = response.context
+    logger.info(response.status, `${(Number(t1 - t0) / 1000000).toFixed(0)}ms`, context.method, context.url.href)
     if (response.status < 400) {
         return response.status === 204 ? undefined : getBody(response).catch(error => {
             logger.error(error)

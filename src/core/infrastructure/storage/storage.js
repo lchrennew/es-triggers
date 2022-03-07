@@ -32,7 +32,6 @@ export default class Storage {
      * @return {Promise<*>}
      */
     get(type, name) {
-        logger.debug('get::args', type, name)
         return this.getByPath(this.getPath(type.kind, name), type)
     }
 

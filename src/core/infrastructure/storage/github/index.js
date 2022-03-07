@@ -37,9 +37,7 @@ class GitHubStorage extends ExternalStorage {
     }
 
     async getByPath(path, type) {
-        logger.debug('getByPath::args', path, type)
         const content = await readFile(owner, repo, path)
-        logger.debug('getByPath::content', content)
         return load(content, type)
     }
 

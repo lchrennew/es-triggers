@@ -24,9 +24,7 @@ class RedisStorage extends ExternalStorage {
     }
 
     async getByPath(path, type) {
-        logger.debug('getByPath::args')
         const content = await redis.get(path)
-        logger.debug('getByPath::content', content)
         return content ? load(content, type) : null
     }
 

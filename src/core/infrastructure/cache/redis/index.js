@@ -13,25 +13,19 @@ class RedisCache extends Cache {
     }
 
     async get(path, type) {
-        this.logger.debug('get::args', path, type)
         const key = this.getKey(path)
         const content = await redis.get(key)
-        this.logger.debug('get::key', key, content)
-        this.logger.debug(content)
         return content ? load(content, type) : null
     }
 
     set(path, content) {
         if (!content) return
-        this.logger.debug('set::args', path, content)
         const key = this.getKey(path)
-        this.logger.debug('set::key', key)
         redis.set(key, dump(content));
         return content
     }
 
     async getOrSet(path, fallback, type) {
-        this.logger.info('getOrSet::args', path, type)
         return await this.get(path, type) ?? await this.set(path, await fallback(path));
     }
 
@@ -44,10 +38,8 @@ class RedisCache extends Cache {
     }
 
     async getsInDir(dir, fallback, type) {
-        this.logger.debug('getsInDir', dir, type)
         const keys = await redis.keys(`${this.getKey(dir)}*`)
         const paths = keys.map(key => this.getPath(key))
-        this.logger.debug('getsInDir paths', ...paths)
         return await this.getsByPaths(paths, fallback, type)
     }
 

@@ -6,16 +6,11 @@ import { decodeBase64, encodeBase64 } from "../../../../utils/encode.js";
 import * as apiPath from "./api-path.js";
 import { query } from "es-fetch-api/middlewares/query.js";
 
-export const createOrgRepository = (owner, name) =>
-    github.api(`orgs/:owner/repos`, POST, useParams({ owner }),
-        json({ auto_init: true, default_branch: "main", name, private: false, template: false }))
-
 export const getFile = async (owner, repo, filepath) => {
     const data = await github.api(apiPath.contents, useParams({ owner, repo, filepath }));
     if (data instanceof Array && !data.length) throw { status: 404, message: 'file not found' }
     return data
 }
-
 
 export const updateFile = ({ owner, repo, filepath, content, sha, operator }) =>
     github.api(
@@ -69,14 +64,6 @@ export const readFile = async (owner, repo, filepath) => {
 export const getBlob = async (owner, repo, sha) =>
     github.api('repos/:owner/:repo/git/blobs/:sha', useParams({ owner, repo, sha }))
 
-
-const getBranch = (owner, repo, branch) =>
-    github.api('repos/:owner/:repo/branches/:branch', useParams({ owner, repo, branch }))
-
-const getCommit = (owner, repo, sha) =>
-    github.api('repos/:owner/:repo/git/commits/:sha', useParams({ owner, repo, sha }))
-
-
 const getRepository = (owner, repo) => github.api('repos/:owner/:repo', useParams({ owner, repo }))
 
 const getDefaultBranch = async (owner, repo) => {
@@ -95,13 +82,6 @@ const getRootTree = async (owner, repo) => {
 
 const getTreeFiles = (tree, dir = '') => tree.tree.filter(({ type, path }) => type === 'blob' && path.startsWith(dir))
 
-
-const getAllFiles = async (owner, repo) => {
-    const defaultBranch = await getDefaultBranch(owner, repo)
-    const tree = await getRootTree(owner, repo)
-    return getTreeFiles(tree)
-}
-
 const readBlob = async (owner, repo, sha) => {
     const blob = await getBlob(owner, repo, sha)
     return decodeBase64(blob.content)
@@ -118,7 +98,6 @@ export const getTreeFilePaths = async (owner, repo, dir = '') => {
     const treeFiles = await getTreeFiles(tree, dir)
     return treeFiles.map(({ path }) => path)
 }
-
 
 export const readFiles = async (owner, repo, ...paths) => Promise.all(paths.map(path => readFile(owner, repo, path)))
 
