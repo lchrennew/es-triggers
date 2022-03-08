@@ -1,5 +1,5 @@
 import { Controller } from "koa-es-template";
-import { Domain } from "./domains.js";
+import { Domain } from "../domains.js";
 import Listener from "../../core/domain/listener.js";
 import { TargetSystem } from "../../core/domain/target-system.js";
 import Template from "../../core/domain/template.js";

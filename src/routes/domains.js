@@ -1,5 +1,5 @@
 import { Controller } from "koa-es-template";
-import Consumer from "../../core/domain/consumer.js";
+import Consumer from "../core/domain/consumer.js";
 
 class Domains extends Controller {
     type
