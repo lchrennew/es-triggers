@@ -17,11 +17,11 @@ export default class Binding extends DomainModel {
             const { bind } = await importNamespace(exportName('bind', script))
             return await bind(sourceEvent)
         } catch (error) {
-            this.onError(sourceEvent, error);
+            Binding.#onError(sourceEvent, error);
         }
     }
 
-    onError(sourceEvent, error) {
+    static #onError(sourceEvent, error) {
         const bindingInternalError = new BindingInternalError(sourceEvent, error)
         bindingInternalError.flush()
     }

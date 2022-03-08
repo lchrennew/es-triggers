@@ -23,19 +23,19 @@ export default class TargetInterceptor extends DomainModel {
             }`
             const { intercept } = await importNamespace(exportName('intercept', script))
             const intercepted = await intercept(context)
-            intercepted && this.onIntercepted(context);
+            intercepted && TargetInterceptor.#onIntercepted(context);
             return intercepted
         } catch (error) {
-            this.onError(context, error);
+            TargetInterceptor.#onError(context, error);
         }
     }
 
-    onError(context, error) {
+    static #onError(context, error) {
         const targetInterceptorInternalError = new TargetInterceptorInternalError(context, error)
         targetInterceptorInternalError.flush()
     }
 
-    onIntercepted(context) {
+    static #onIntercepted(context) {
         const targetRequestIntercepted = new TargetRequestIntercepted(context)
         targetRequestIntercepted.flush()
     }

@@ -14,7 +14,7 @@ export class TargetSystem extends DomainModel {
         super(TargetSystem.kind, name, { title }, { url });
     }
 
-    getUrl(variables) {
+    #getUrl(variables) {
         return exec(this.spec.url, variables)
     }
 
@@ -24,7 +24,7 @@ export class TargetSystem extends DomainModel {
             return next()
         }
         try {
-            const baseURL = this.getUrl(context.variables)
+            const baseURL = this.#getUrl(context.variables)
             const api = getApi(baseURL)
 
             const apiResponse =
@@ -36,24 +36,24 @@ export class TargetSystem extends DomainModel {
                     headers({ 'X-TRIGGER-EVENT-ID': context.eventID }),
                     json(request.body))
 
-            const response = await this.responseToObject(apiResponse);
-            this.onFinished(context, { request, response })
+            const response = await TargetSystem.#responseToObject(apiResponse);
+            TargetSystem.#onFinished(context, { request, response })
         } catch (error) {
-            this.onRequestError(context, error);
+            TargetSystem.#onRequestError(context, error);
         }
     }
 
-    onRequestError(context, error) {
+    static #onRequestError(context, error) {
         const targetSystemRequestedError = new TargetSystemRequestedError(context, error)
         targetSystemRequestedError.flush()
     }
 
-    onFinished(context, result) {
+    static #onFinished(context, result) {
         const targetSystemRequested = new TargetSystemRequested(context, result)
         targetSystemRequested.flush()
     }
 
-    async responseToObject(response) {
+    static async #responseToObject(response) {
         const { headers, ok, redirected, status, statusText, url } = response
         const body = await response.text()
         return {

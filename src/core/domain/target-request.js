@@ -12,7 +12,7 @@ export default class TargetRequest extends DomainModel {
         super(TargetRequest.kind, name, { trigger }, { props, script });
     }
 
-    async bind(sourceEvent) {
+    async #bind(sourceEvent) {
         try {
             const script = `async ({ listener, trigger, method, query, headers, body, props, variables })=>{\
         ${this.spec.script};\
@@ -20,11 +20,11 @@ export default class TargetRequest extends DomainModel {
             const { bind } = await importNamespace(exportName('bind', script))
             return await bind({ ...sourceEvent, variables: { ...sourceEvent.variables } })
         } catch (error) {
-            this.onError(sourceEvent, error);
+            TargetRequest.#onError(sourceEvent, error);
         }
     }
 
-    onError(sourceEvent, error) {
+    static #onError(sourceEvent, error) {
         const targetRequestInternalError = new TargetRequestInternalError(sourceEvent, error)
         targetRequestInternalError.flush()
     }
@@ -39,11 +39,11 @@ export default class TargetRequest extends DomainModel {
      */
     async trigger(context, targetInterceptor, targetSystem, template,) {
         const targetIntercepted = await targetInterceptor.intercept(context)
-        targetIntercepted || await this.sendTo(targetSystem, context, template);
+        targetIntercepted || await this.#sendTo(targetSystem, context, template);
     }
 
-    async sendTo(targetSystem, context, template) {
-        const variables = await this.bind(context)
+    async #sendTo(targetSystem, context, template) {
+        const variables = await this.#bind(context)
         const request = template.apply(variables)
         targetSystem.commit(request, { ...context, variables })
     }

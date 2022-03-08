@@ -25,7 +25,7 @@ export default class Trigger extends DomainModel {
      *
      * @return {Promise<Binding>}
      */
-    async getBinding() {
+    async #getBinding() {
         return this.#binding ??= await get(Binding, this.spec.binding)
     }
 
@@ -33,7 +33,7 @@ export default class Trigger extends DomainModel {
      *
      * @return {Promise<TargetSystem>}
      */
-    async getTargetSystem() {
+    async #getTargetSystem() {
         return this.#targetSystem ??= await get(TargetSystem, this.spec.targetSystem)
     }
 
@@ -41,7 +41,7 @@ export default class Trigger extends DomainModel {
      *
      * @return {Promise<Template>}
      */
-    async getTemplate() {
+    async #getTemplate() {
         return this.#template ??= await get(Template, this.spec.template)
     }
 
@@ -49,7 +49,7 @@ export default class Trigger extends DomainModel {
      *
      * @return {Promise<SourceInterceptor>}
      */
-    async getSourceInterceptor() {
+    async #getSourceInterceptor() {
         return this.#sourceInterceptor ??= await get(SourceInterceptor, this.spec.sourceInterceptor)
     }
 
@@ -57,7 +57,7 @@ export default class Trigger extends DomainModel {
      *
      * @return {Promise<TargetInterceptor>}
      */
-    async getTargetInterceptor() {
+    async #getTargetInterceptor() {
         return this.#targetInterceptor ??= await get(TargetInterceptor, this.spec.targetInterceptor)
     }
 
@@ -65,32 +65,32 @@ export default class Trigger extends DomainModel {
      *
      * @return {Promise<TargetRequest[]>}
      */
-    async getTargetRequests() {
+    async #getTargetRequests() {
         return this.#targetRequests ??= await getAll(TargetRequest, this.name)
     }
 
     async invoke(context) {
-        const sourceIntercepted = await this.interceptSource(context);
+        const sourceIntercepted = await this.#interceptSource(context);
         if (sourceIntercepted) return
-        const variables = await this.bindVariables(context);
-        const targetRequests = await this.getTargetRequests()
-        await this.triggerAll(targetRequests, { ...context, variables, });
+        const variables = await this.#bindVariables(context);
+        const targetRequests = await this.#getTargetRequests()
+        await this.#triggerAll(targetRequests, { ...context, variables, });
     }
 
-    async bindVariables(context) {
-        const binding = await this.getBinding()
+    async #bindVariables(context) {
+        const binding = await this.#getBinding()
         return await binding.bind({ ...context, binding: binding.name, });
     }
 
-    async interceptSource(context) {
-        const sourceInterceptor = await this.getSourceInterceptor()
+    async #interceptSource(context) {
+        const sourceInterceptor = await this.#getSourceInterceptor()
         return sourceInterceptor.intercept({ ...context, sourceInterceptor: sourceInterceptor.name });
     }
 
-    async triggerAll(targetRequests, context) {
-        const targetInterceptor = await this.getTargetInterceptor()
-        const targetSystem = await this.getTargetSystem()
-        const template = await this.getTemplate()
+    async #triggerAll(targetRequests, context) {
+        const targetInterceptor = await this.#getTargetInterceptor()
+        const targetSystem = await this.#getTargetSystem()
+        const template = await this.#getTemplate()
 
         targetRequests.forEach(
             targetRequest =>

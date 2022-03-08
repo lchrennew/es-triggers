@@ -20,20 +20,20 @@ export default class SourceInterceptor extends DomainModel {
             const script = `async ({method,headers,body,query,listener, trigger})=>{${this.spec.script}}`
             const { intercept } = await importNamespace(exportName('intercept', script))
             const intercepted = await intercept(context)
-            intercepted && this.onIntercepted(context);
+            intercepted && SourceInterceptor.#onIntercepted(context);
             return intercepted
         } catch (error) {
-            this.onError(context, error);
+            SourceInterceptor.#onError(context, error);
         }
         return true
     }
 
-    onError(context, error) {
+    static #onError(context, error) {
         const sourceInterceptorInternalError = new SourceInterceptorInternalError(context, error)
         sourceInterceptorInternalError.flush()
     }
 
-    onIntercepted(context) {
+    static #onIntercepted(context) {
         const sourceRequestIntercepted = new SourceRequestIntercepted(context)
         sourceRequestIntercepted.flush()
     }
