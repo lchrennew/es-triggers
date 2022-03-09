@@ -1,0 +1,6 @@
+{
+  "verbose": true,
+  "ignore": [".git", "node_modules"],
+  "watch": [".env", ".env.*", "src/"],
+  "ext": "env,local,js"
+}
