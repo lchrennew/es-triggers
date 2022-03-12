@@ -70,3 +70,6 @@
 3. CI/CD系统的任务完成后，通过这个服务实现流水线的WebHook和质量门禁。
 4. CI/CD系统的任务执行，可以通过这个服务与第三方执行系统（比如SonarQube）进行集成。
 
+## 七、授权
+
+本服务采用 [MIT](https://github.com/lchrennew/es-triggers/blob/main/LICENSE) 授权。
