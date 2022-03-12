@@ -59,4 +59,4 @@
 
 这个服务负责将所有这些配置自动的贯穿起来。
 
-![](/Users/lichun/IdeaProjects/es-triggers/doc/assets/workflow.png)
+![](https://github.com/lchrennew/es-triggers/blob/main/doc/assets/workflow.png)
