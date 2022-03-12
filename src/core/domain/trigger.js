@@ -61,19 +61,22 @@ export default class Trigger extends DomainModel {
         return this.#targetInterceptor ??= await get(TargetInterceptor, this.spec.targetInterceptor)
     }
 
+
     /**
      *
+     * @param namespace
      * @return {Promise<TargetRequest[]>}
      */
-    async #getTargetRequests() {
-        return this.#targetRequests ??= await getAll(TargetRequest, this.name)
+    async #getTargetRequests(namespace) {
+        // TODO: 增加目标请求的筛选
+        return this.#targetRequests ??= await getAll(TargetRequest, `${this.name}/${namespace}`)
     }
 
     async invoke(context) {
         const sourceIntercepted = await this.#interceptSource(context);
         if (sourceIntercepted) return
         const variables = await this.#bindVariables(context);
-        const targetRequests = await this.#getTargetRequests()
+        const targetRequests = await this.#getTargetRequests(variables['~'])
         await this.#triggerAll(targetRequests, { ...context, variables, });
     }
 

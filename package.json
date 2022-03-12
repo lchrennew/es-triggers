@@ -10,14 +10,17 @@
   },
   "devDependencies": {
     "jest": "^27.5.1",
-    "nodemon": "^2.0.15"
+    "nodemon": "^2.0.15",
+    "should": "^13.2.3",
+    "sinon": "^13.0.1",
+    "supertest": "^6.2.2"
   },
   "dependencies": {
     "es-fetch-api": "^1.0.20",
     "es-ioredis-url": "^1.0.3",
     "es-object-id": "^1.0.0",
     "js-yaml": "^4.1.0",
-    "koa-es-template": "^1.0.17",
+    "koa-es-template": "^1.0.18",
     "node-fetch": "^4.0.0-beta.4",
     "path-to-regexp": "^6.2.0"
   }
