@@ -1,4 +1,3 @@
-import { redis } from "../../../utils/redis.js";
 import { getLogger } from "koa-es-template";
 import { generateObjectID } from "es-object-id";
 
