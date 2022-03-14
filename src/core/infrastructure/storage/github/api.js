@@ -62,17 +62,17 @@ export const readFile = async (owner, repo, filepath) => {
 }
 
 export const getBlob = async (owner, repo, sha) =>
-    github.api('repos/:owner/:repo/git/blobs/:sha', useParams({ owner, repo, sha }))
+    github.api(apiPath.blob, useParams({ owner, repo, sha }))
 
 const getRepository = (owner, repo) => github.api('repos/:owner/:repo', useParams({ owner, repo }))
 
 const getDefaultBranch = async (owner, repo) => {
-    const repository = await getRepository(owner, repo)
-    return repository.default_branch
+    const { defaultBranch } = await getRepository(owner, repo)
+    return defaultBranch
 }
 
 export const getTree = (owner, repo, sha, recursive = true) =>
-    github.api('repos/:owner/:repo/git/trees/:sha', useParams({ owner, repo, sha }), query({ recursive }))
+    github.api(apiPath.tree, useParams({ owner, repo, sha }), query({ recursive }))
 
 
 const getRootTree = async (owner, repo) => {
