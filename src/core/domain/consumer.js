@@ -48,11 +48,12 @@ export default class Consumer {
     /**
      *
      * @param type
+     * @param path
      * @param storage
      * @return {Promise<*[]>}
      */
-    viewAll(type, storage = defaultStorage) {
-        return storage.getAll(type)
+    viewAll(type, path, storage = defaultStorage) {
+        return storage.getAll(type, path)
     }
 
     /**
