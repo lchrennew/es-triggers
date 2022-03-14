@@ -20,15 +20,6 @@ export default class DomainEvent {
     }
 
     flush() {
-        logger.info({ ID: this.eventID, TYPE: this.type, })
-        redis.lpush('{events}:all', this.eventID)
-        redis.set(
-            `{event}:${this.eventID}`,
-            JSON.stringify({
-                content: this.content,
-                type: this.type,
-                id: this.eventID,
-            }))
-        this.keys.forEach(key => redis.sadd(`{events}:${key}`, this.eventID))
+        logger.info({ ID: this.eventID, TYPE: this.type, CONTENT: this.content })
     }
 }
