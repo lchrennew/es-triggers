@@ -1,4 +1,4 @@
-import * as defaultStorage from "../infrastructure/storage/index.js";
+import {defaultStorage, defaultCache} from "../infrastructure/storage/index.js";
 import Trigger from "./trigger.js";
 
 export default class Client {
@@ -8,7 +8,7 @@ export default class Client {
         this.name = name;
     }
 
-    async getTriggers(storage = defaultStorage, cache = defaultStorage) {
-        return storage.getAll(Trigger, name, storage, cache)
+    async getTriggers(storage = defaultStorage, cache = defaultCache) {
+        return storage.getAll(Trigger, this.name, storage, cache)
     }
 }
