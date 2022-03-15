@@ -67,7 +67,8 @@ export default class Trigger extends DomainModel {
      * @param namespace
      * @return {Promise<TargetRequest[]>}
      */
-    async #getTargetRequests(namespace) {
+    async #getTargetRequests(namespace = '') {
+        console.log(`${this.name}/${namespace}`)
         // TODO: 增加目标请求的筛选
         return this.#targetRequests ??= await getAll(TargetRequest, `${this.name}/${namespace}`)
     }

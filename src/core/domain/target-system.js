@@ -37,7 +37,7 @@ export class TargetSystem extends DomainModel {
                     json(request.body))
 
             const response = await TargetSystem.#responseToObject(apiResponse);
-            TargetSystem.#onFinished(context, { request, response })
+            TargetSystem.#onFinished(context, { baseURL, request, response })
         } catch (error) {
             TargetSystem.#onRequestError(context, error);
         }

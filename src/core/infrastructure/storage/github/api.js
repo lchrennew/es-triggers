@@ -5,6 +5,8 @@ import { DELETE, POST, PUT } from "es-fetch-api/middlewares/methods.js";
 import { decodeBase64, encodeBase64 } from "../../../../utils/encode.js";
 import * as apiPath from "./api-path.js";
 import { query } from "es-fetch-api/middlewares/query.js";
+import { getLogger } from 'koa-es-template';
+const logger = getLogger('GITHUB API')
 
 export const getFile = async (owner, repo, filepath) => {
     const data = await github.api(apiPath.contents, useParams({ owner, repo, filepath }));
@@ -67,7 +69,7 @@ export const getBlob = async (owner, repo, sha) =>
 const getRepository = (owner, repo) => github.api('repos/:owner/:repo', useParams({ owner, repo }))
 
 const getDefaultBranch = async (owner, repo) => {
-    const { defaultBranch } = await getRepository(owner, repo)
+    const { default_branch: defaultBranch } = await getRepository(owner, repo)
     return defaultBranch
 }
 
