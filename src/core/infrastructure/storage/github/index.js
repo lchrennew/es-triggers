@@ -24,7 +24,7 @@ class GitHubStorage extends ExternalStorage {
     }
 
     async getsByPath(type, path) {
-        const files = await readTreeFiles(owner, repo, [type.kind, path].join('/'))
+        const files = await readTreeFiles(owner, repo, [ type.kind, path ].join('/'))
         return this.gets(type, ...files)
     }
 
@@ -33,7 +33,7 @@ class GitHubStorage extends ExternalStorage {
     }
 
     async getPathsByPath(type, path) {
-        return getTreeFilePaths(owner, repo, [type.kind, path].join('/'))
+        return getTreeFilePaths(owner, repo, [ type.kind, path ].join('/'))
     }
 
     async getByPath(path, type) {
@@ -42,7 +42,7 @@ class GitHubStorage extends ExternalStorage {
     }
 
     async getAll(type, path) {
-        const files = await readTreeFiles(owner, repo, [type.kind, path].join('/'))
+        const files = await readTreeFiles(owner, repo, [ type.kind, path ].join('/'))
         return this.gets(type, ...files)
     }
 

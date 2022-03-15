@@ -19,6 +19,6 @@ export default class DomainEvent {
     }
 
     flush() {
-        logger.info({ ID: this.eventID, TYPE: this.type, CONTENT: this.content })
+        logger.info(JSON.stringify({ ID: this.eventID, TYPE: this.type, CONTENT: this.content }, null, 4))
     }
 }

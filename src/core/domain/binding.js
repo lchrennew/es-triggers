@@ -10,6 +10,11 @@ export default class Binding extends DomainModel {
         super(Binding.kind, name, metadata, { script });
     }
 
+    static #onError(sourceEvent, error) {
+        const bindingInternalError = new BindingInternalError(sourceEvent, error)
+        bindingInternalError.flush()
+    }
+
     async bind(sourceEvent) {
         try {
             const script = `async ({ listener, trigger, method, query, headers, body, eventID })=>\
@@ -19,10 +24,5 @@ export default class Binding extends DomainModel {
         } catch (error) {
             Binding.#onError(sourceEvent, error);
         }
-    }
-
-    static #onError(sourceEvent, error) {
-        const bindingInternalError = new BindingInternalError(sourceEvent, error)
-        bindingInternalError.flush()
     }
 }

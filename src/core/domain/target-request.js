@@ -12,6 +12,11 @@ export default class TargetRequest extends DomainModel {
         super(TargetRequest.kind, name, { trigger }, { props, script });
     }
 
+    static #onError(sourceEvent, error) {
+        const targetRequestInternalError = new TargetRequestInternalError(sourceEvent, error)
+        targetRequestInternalError.flush()
+    }
+
     async #bind(sourceEvent) {
         try {
             const script = `async ({ listener, trigger, method, query, headers, body, props, variables })=>{\
@@ -22,11 +27,6 @@ export default class TargetRequest extends DomainModel {
         } catch (error) {
             TargetRequest.#onError(sourceEvent, error);
         }
-    }
-
-    static #onError(sourceEvent, error) {
-        const targetRequestInternalError = new TargetRequestInternalError(sourceEvent, error)
-        targetRequestInternalError.flush()
     }
 
     /**

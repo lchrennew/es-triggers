@@ -10,6 +10,16 @@ export default class SourceInterceptor extends DomainModel {
         super(SourceInterceptor.kind, name, { title }, { script });
     }
 
+    static #onError(context, error) {
+        const sourceInterceptorInternalError = new SourceInterceptorInternalError(context, error)
+        sourceInterceptorInternalError.flush()
+    }
+
+    static #onIntercepted(context) {
+        const sourceRequestIntercepted = new SourceRequestIntercepted(context)
+        sourceRequestIntercepted.flush()
+    }
+
     /**
      *
      * @param context
@@ -26,15 +36,5 @@ export default class SourceInterceptor extends DomainModel {
             SourceInterceptor.#onError(context, error);
         }
         return true
-    }
-
-    static #onError(context, error) {
-        const sourceInterceptorInternalError = new SourceInterceptorInternalError(context, error)
-        sourceInterceptorInternalError.flush()
-    }
-
-    static #onIntercepted(context) {
-        const sourceRequestIntercepted = new SourceRequestIntercepted(context)
-        sourceRequestIntercepted.flush()
     }
 }

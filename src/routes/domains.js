@@ -15,7 +15,7 @@ class Domains extends Controller {
 
     async viewAll(ctx) {
         const consumer = new Consumer(ctx.state.username)
-        const { path }  = ctx.query
+        const { path } = ctx.query
         ctx.body = await consumer.viewAll(this.type, path)
     }
 

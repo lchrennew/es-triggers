@@ -11,6 +11,16 @@ export default class TargetInterceptor extends DomainModel {
         super(TargetInterceptor.kind, name, { title }, { script });
     }
 
+    static #onError(context, error) {
+        const targetInterceptorInternalError = new TargetInterceptorInternalError(context, error)
+        targetInterceptorInternalError.flush()
+    }
+
+    static #onIntercepted(context) {
+        const targetRequestIntercepted = new TargetRequestIntercepted(context)
+        targetRequestIntercepted.flush()
+    }
+
     /**
      *
      * @return {Promise<void>}
@@ -28,15 +38,5 @@ export default class TargetInterceptor extends DomainModel {
         } catch (error) {
             TargetInterceptor.#onError(context, error);
         }
-    }
-
-    static #onError(context, error) {
-        const targetInterceptorInternalError = new TargetInterceptorInternalError(context, error)
-        targetInterceptorInternalError.flush()
-    }
-
-    static #onIntercepted(context) {
-        const targetRequestIntercepted = new TargetRequestIntercepted(context)
-        targetRequestIntercepted.flush()
     }
 }

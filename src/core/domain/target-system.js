@@ -14,6 +14,30 @@ export class TargetSystem extends DomainModel {
         super(TargetSystem.kind, name, { title }, { url });
     }
 
+    static #onRequestError(context, error) {
+        const targetSystemRequestedError = new TargetSystemRequestedError(context, error)
+        targetSystemRequestedError.flush()
+    }
+
+    static #onFinished(context, result) {
+        const targetSystemRequested = new TargetSystemRequested(context, result)
+        targetSystemRequested.flush()
+    }
+
+    static async #responseToObject(response) {
+        const { headers, ok, redirected, status, statusText, url } = response
+        const body = await response.text()
+        return {
+            ok,
+            redirected,
+            status,
+            statusText,
+            url,
+            headers: Object.fromEntries(headers.entries()),
+            body
+        }
+    }
+
     #getUrl(variables) {
         return exec(this.spec.url, variables)
     }
@@ -40,30 +64,6 @@ export class TargetSystem extends DomainModel {
             TargetSystem.#onFinished(context, { baseURL, request, response })
         } catch (error) {
             TargetSystem.#onRequestError(context, error);
-        }
-    }
-
-    static #onRequestError(context, error) {
-        const targetSystemRequestedError = new TargetSystemRequestedError(context, error)
-        targetSystemRequestedError.flush()
-    }
-
-    static #onFinished(context, result) {
-        const targetSystemRequested = new TargetSystemRequested(context, result)
-        targetSystemRequested.flush()
-    }
-
-    static async #responseToObject(response) {
-        const { headers, ok, redirected, status, statusText, url } = response
-        const body = await response.text()
-        return {
-            ok,
-            redirected,
-            status,
-            statusText,
-            url,
-            headers: Object.fromEntries(headers.entries()),
-            body
         }
     }
 }
