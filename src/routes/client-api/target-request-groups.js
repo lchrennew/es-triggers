@@ -8,15 +8,9 @@ export default class TargetRequestGroups extends Controller {
 
     constructor(config, ...middlewares) {
         super(config, ...middlewares);
-        this.get('/:name', this.getGroup)
+        this.delete('/:name', this.deleteGroup)
         this.put('/:name', this.saveGroup)
         this.get('/:name/requests', this.getTargetRequests)
-    }
-
-    async getGroup(ctx) {
-        const consumer = new Consumer(ctx.state.username)
-        const { name } = ctx.params
-        ctx.body = await consumer.viewAll(TargetRequestGroup, name)
     }
 
     async saveGroup(ctx) {
@@ -40,8 +34,9 @@ export default class TargetRequestGroups extends Controller {
         } else {
             await Promise.all(targetRequests.map(r => consumer.save(new TargetRequest(r.name, r.metadata, r.spec))))
         }
-
-        await consumer.save(new TargetRequestGroup(name, { targetRequests: targetRequests.map(({ name }) => name) }))
+        const spec = { targetRequests: targetRequests.map(({ name }) => name) }
+        if (!matches(group?.spec, spec))
+            await consumer.save(new TargetRequestGroup(name, {}, spec))
         ctx.body = { ok: true }
     }
 
@@ -56,5 +51,12 @@ export default class TargetRequestGroups extends Controller {
         }
         ctx.body = await consumer.viewByNames(TargetRequest, group.specs.targetRequests)
 
+    }
+
+    async deleteGroup(ctx) {
+        const consumer = new Consumer(ctx.state.username)
+        const { name } = ctx.params
+        await consumer.deleteByName(TargetRequestGroup.kind, name)
+        ctx.body = { ok: true }
     }
 }
