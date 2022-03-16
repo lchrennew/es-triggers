@@ -51,12 +51,15 @@ export const saveFile = async (owner, repo, filepath, content, operator) => {
     }
 }
 
-export const deleteFile = async (owner, repo, filepath, operator) => {
-    let { sha } = await getFile(owner, repo, filepath)
-    await github.api(
+const deleteContent = (owner, repo, filepath, sha, operator) =>
+    github.api(
         apiPath.contents,
         DELETE,
-        useParams({ owner, repo, filepath }), json({ sha, message: `${operator} deleted ${filepath}` }))
+        useParams({ owner, repo, filepath }), json({ sha, message: `${operator} deleted ${filepath}` }));
+
+export const deleteFile = async (owner, repo, filepath, operator) => {
+    let { sha } = await getFile(owner, repo, filepath)
+    await deleteContent(owner, repo, filepath, sha, operator);
 }
 
 export const readFile = async (owner, repo, filepath) => {

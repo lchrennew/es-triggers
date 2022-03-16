@@ -92,3 +92,4 @@ export const valuesFromFlatEntries = (...args) => {
     return [ ...new Set(args.filter((arg, i) => i & 1)) ]
 }
 
+export const matches = (o1, o2) => JSON.stringify(o1) === JSON.stringify(o2)

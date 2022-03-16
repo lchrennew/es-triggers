@@ -41,7 +41,7 @@ export default class Consumer {
      * @return {Promise<*>}
      */
     deleteByName(type, name, storage = defaultStorage) {
-        logger.info(`consumer ${this.username} saved ${type.kind} ${name}.`)
+        logger.info(`consumer ${this.username} deleted file ${type.kind} ${name}.`)
         return storage.removeByName(type.kind, name, this.username)
     }
 
@@ -65,5 +65,9 @@ export default class Consumer {
      */
     view(type, name, storage = defaultStorage) {
         return storage.get(type, name)
+    }
+
+    viewByNames(type, names = [], storage = defaultStorage) {
+        return storage.getAllByNames(type, names, storage)
     }
 }
