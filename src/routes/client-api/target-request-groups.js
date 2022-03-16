@@ -8,33 +8,39 @@ export default class TargetRequestGroups extends Controller {
 
     constructor(config, ...middlewares) {
         super(config, ...middlewares);
-        this.delete('/:name', this.deleteGroup)
-        this.put('/:name', this.saveGroup)
-        this.get('/:name/requests', this.getTargetRequests)
+        this.delete('/', this.deleteGroup)
+        this.put('/', this.saveGroup)
+        this.get('/requests', this.getTargetRequests)
     }
 
     async saveGroup(ctx) {
         const consumer = new Consumer(ctx.state.username)
-        const { name } = ctx.params
-        const { targetRequests = [] } = ctx.request.body
-        const group = await consumer.view(TargetRequestGroup, name)
-        const newIndex = Object.fromEntries(targetRequests.map(r => [ r.name, r ]))
+        const { name } = ctx.query
+        const targetRequests = ctx.request.body ?? []
+        const group = await consumer.view(TargetRequestGroup, name).catch(() => null)
+        const newIndex = Object.fromEntries(targetRequests.map(r => [r.name, r]))
         if (group) {
             const existing = await consumer.viewByNames(TargetRequest, group.spec.targetRequests)
             const removed = existing.filter(r => !newIndex[r.name])
-            const oldIndex = Object.fromEntries(existing.map(r => [ r.name, r ]))
+            const oldIndex = Object.fromEntries(existing.map(r => [r.name, r]))
             const modified = targetRequests.filter(r => !matches(r.spec, oldIndex[r.name]?.spec))
 
-            await Promise.all(
-                [
-                    ...removed.map(r => consumer.deleteByName(TargetRequest, r.name)),
-                    ...modified.map(r => consumer.save(new TargetRequest(r.name, r.metadata, r.spec))),
-                ]
-            )
+            for (const r of removed) {
+                await consumer.deleteByName(TargetRequest, r.name)
+            }
+            for (const r of modified) {
+                await consumer.save(new TargetRequest(r.name, r.metadata, r.spec))
+            }
         } else {
-            await Promise.all(targetRequests.map(r => consumer.save(new TargetRequest(r.name, r.metadata, r.spec))))
+            for (const r of targetRequests) {
+                await consumer.save(new TargetRequest(r.name, r.metadata, r.spec))
+            }
         }
+
         const spec = { targetRequests: targetRequests.map(({ name }) => name) }
+
+        this.logger.debug(spec, targetRequests)
+
         if (!matches(group?.spec, spec))
             await consumer.save(new TargetRequestGroup(name, {}, spec))
         ctx.body = { ok: true }
@@ -42,20 +48,21 @@ export default class TargetRequestGroups extends Controller {
 
     async getTargetRequests(ctx) {
         const consumer = new Consumer(ctx.state.username)
-        const { name } = ctx.params
-        const group = await consumer.view(TargetRequestGroup, name)
+        const { name } = ctx.query
+        this.logger.debug(name)
+        const group = await consumer.view(TargetRequestGroup, name).catch(() => null)
 
         if (!group) {
-            ctx.status = 404
-            ctx.body = { ok: false }
+            ctx.body = []
+            return
         }
-        ctx.body = await consumer.viewByNames(TargetRequest, group.specs.targetRequests)
+        ctx.body = await consumer.viewByNames(TargetRequest, group.spec.targetRequests)
 
     }
 
     async deleteGroup(ctx) {
         const consumer = new Consumer(ctx.state.username)
-        const { name } = ctx.params
+        const { name } = ctx.query
         await consumer.deleteByName(TargetRequestGroup.kind, name)
         ctx.body = { ok: true }
     }

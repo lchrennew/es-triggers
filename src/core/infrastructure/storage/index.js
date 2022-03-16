@@ -25,21 +25,21 @@ export const defaultStorage = new Storage()
  * @return {Promise<void>}
  */
 export const save = async (domainModel, operator,
-                           storage = defaultStorage, cache = defaultCache) => {
+    storage = defaultStorage, cache = defaultCache) => {
     const result = await storage.save(domainModel, operator)
     await cache.set(storage.getModelPath(domainModel), domainModel)
     return result
 }
 
 export const remove = async (domainModel, operator,
-                             storage = defaultStorage, cache = defaultCache) => {
+    storage = defaultStorage, cache = defaultCache) => {
     const path = storage.getModelPath(domainModel)
     const result = await storage.remove(path, operator)
     cache.remove(path)
     return result
 }
 export const removeByName = async (kind, name, operator,
-                                   storage = defaultStorage, cache = defaultCache) => {
+    storage = defaultStorage, cache = defaultCache) => {
     const path = storage.getModelPath({ kind, name })
     const result = await storage.remove(path, operator)
     cache.remove(path)
@@ -55,7 +55,7 @@ export const removeByName = async (kind, name, operator,
  * @return {Promise<*>}
  */
 export const get = (type, name,
-                    storage = defaultStorage, cache = defaultCache) => {
+    storage = defaultStorage, cache = defaultCache) => {
     const path = storage.getModelPath({ kind: type.kind, name })
     return cache.getOrSet(path, fallback(type, storage), type)
 }
@@ -77,7 +77,7 @@ const fallback = (type, storage = defaultStorage) => path => storage.getByPath(p
  * @return {Promise<*[]>}
  */
 export const getAll = async (type, path = '',
-                             storage = defaultStorage, cache = defaultCache) => {
+    storage = defaultStorage, cache = defaultCache) => {
     const paths = await storage.getPathsByPath(type, path)
     return cache.getsByPaths(paths, fallback(type, storage), type)
 }
@@ -91,7 +91,7 @@ export const getAll = async (type, path = '',
  * @return {Promise<*[]>}
  */
 export const getAllByNames = (type, names,
-                              storage = defaultStorage, cache = defaultCache) => {
+    storage = defaultStorage, cache = defaultCache) => {
     const paths = names.map(name => storage.getModelPath({ kind: type.kind, name }))
     return cache.getsByPaths(paths, fallback(type, storage), type)
 }

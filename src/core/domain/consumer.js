@@ -1,4 +1,4 @@
-import * as defaultStorage from "../infrastructure/storage/index.js";
+import * as storage from "../infrastructure/storage/index.js";
 import { DomainModel } from "./domain-model.js";
 import { getLogger } from "koa-es-template";
 
@@ -17,7 +17,7 @@ export default class Consumer {
      * @param storage
      * @return {Promise<void>}
      */
-    save(domainModel, storage = defaultStorage) {
+    save(domainModel) {
         logger.info(`consumer ${this.username} saved ${domainModel}.`)
         return storage.save(domainModel, this.username)
     }
@@ -28,7 +28,7 @@ export default class Consumer {
      * @param storage
      * @return {Promise<*>}
      */
-    delete(domainModel, storage = defaultStorage) {
+    delete(domainModel) {
         logger.info(`consumer ${this.username} delete ${domainModel}.`)
         return storage.remove(domainModel, this.username)
     }
@@ -40,7 +40,7 @@ export default class Consumer {
      * @param storage
      * @return {Promise<*>}
      */
-    deleteByName(type, name, storage = defaultStorage) {
+    deleteByName(type, name) {
         logger.info(`consumer ${this.username} deleted file ${type.kind} ${name}.`)
         return storage.removeByName(type.kind, name, this.username)
     }
@@ -52,7 +52,7 @@ export default class Consumer {
      * @param storage
      * @return {Promise<*[]>}
      */
-    viewAll(type, path, storage = defaultStorage) {
+    viewAll(type, path) {
         return storage.getAll(type, path)
     }
 
@@ -63,11 +63,11 @@ export default class Consumer {
      * @param storage
      * @return {Promise<*>}
      */
-    view(type, name, storage = defaultStorage) {
+    view(type, name) {
         return storage.get(type, name)
     }
 
-    viewByNames(type, names = [], storage = defaultStorage) {
-        return storage.getAllByNames(type, names, storage)
+    viewByNames(type, names = []) {
+        return storage.getAllByNames(type, names)
     }
 }
