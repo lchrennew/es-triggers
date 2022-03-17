@@ -39,8 +39,6 @@ export default class TargetRequestGroups extends Controller {
 
         const spec = { targetRequests: targetRequests.map(({ name }) => name) }
 
-        this.logger.debug(spec, targetRequests)
-
         if (!matches(group?.spec, spec))
             await consumer.save(new TargetRequestGroup(name, {}, spec))
         ctx.body = { ok: true }

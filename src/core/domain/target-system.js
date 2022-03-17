@@ -6,6 +6,8 @@ import { query } from "es-fetch-api/middlewares/query.js";
 import { json } from "es-fetch-api/middlewares/body.js";
 import TargetSystemRequestedError from "./events/target-system-requested-error.js";
 import TargetSystemRequested from "./events/target-system-requested.js";
+import { useParams } from "../infrastructure/storage/github/clients/index.js";
+import { brokerEnabled } from "../../utils/toggles.js";
 
 export class TargetSystem extends DomainModel {
     static kind = 'target-system'
@@ -19,9 +21,13 @@ export class TargetSystem extends DomainModel {
         targetSystemRequestedError.flush()
     }
 
-    static #onFinished(context, result) {
+    static async #onFinished(context, result) {
         const targetSystemRequested = new TargetSystemRequested(context, result)
         targetSystemRequested.flush()
+        if (brokerEnabled && context.query?.session) {
+            const brokerApi = getApi(process.env.SOCKJS_BROKER_API)
+            brokerApi('publish/:topic', useParams({ topic: context.query.session }), POST, json(result.response)).catch(() => undefined)
+        }
     }
 
     static async #responseToObject(response) {
@@ -61,7 +67,7 @@ export class TargetSystem extends DomainModel {
                     json(request.body))
 
             const response = await TargetSystem.#responseToObject(apiResponse);
-            TargetSystem.#onFinished(context, { baseURL, request, response })
+            await TargetSystem.#onFinished(context, { baseURL, request, response })
         } catch (error) {
             TargetSystem.#onRequestError(context, error);
         }
