@@ -26,7 +26,8 @@ export class TargetSystem extends DomainModel {
         targetSystemRequested.flush()
         if (brokerEnabled && context.query?.session) {
             const brokerApi = getApi(process.env.SOCKJS_BROKER_API)
-            brokerApi('publish/:topic', useParams({ topic: context.query.session }), POST, json(result.response)).catch(() => undefined)
+            brokerApi('publish/:topic', useParams({ topic: context.query.session }), POST, json(result.response))
+                .catch(error => console.error(error))
         }
     }
 
