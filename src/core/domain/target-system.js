@@ -50,7 +50,7 @@ export class TargetSystem extends DomainModel {
 
     async commit(request, context) {
         const headers = obj => async (ctx, next) => {
-            ctx.headers = { ...ctx.headers, obj }
+            ctx.headers = { ...ctx.headers, ...obj }
             return next()
         }
         try {
