@@ -12,7 +12,7 @@ export default class Triggers extends Controller {
     async getTriggersByTargetSystem(ctx) {
         const { name } = ctx.params
         const client = new Client(name)
-        ctx.body = await client.getTriggers()
+        ctx.body = await client.getTriggers().catch(() => [])
     }
 
 
