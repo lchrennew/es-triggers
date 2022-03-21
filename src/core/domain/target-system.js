@@ -8,6 +8,9 @@ import TargetSystemRequestedError from "./events/target-system-requested-error.j
 import TargetSystemRequested from "./events/target-system-requested.js";
 import { useParams } from "../infrastructure/storage/github/clients/index.js";
 import { brokerEnabled } from "../../utils/toggles.js";
+import { getLogger } from "koa-es-template";
+
+const logger = getLogger('TARGET-SYSTEM')
 
 export class TargetSystem extends DomainModel {
     static kind = 'target-system'
@@ -27,7 +30,7 @@ export class TargetSystem extends DomainModel {
         if (brokerEnabled && context.query?.session) {
             const brokerApi = getApi(process.env.SOCKJS_BROKER_API)
             brokerApi('publish/:topic', useParams({ topic: context.query.session }), POST, json(result.response))
-                .catch(error => console.error(error))
+                .catch(error => logger.error(error))
         }
     }
 
