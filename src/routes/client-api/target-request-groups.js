@@ -47,7 +47,6 @@ export default class TargetRequestGroups extends Controller {
     async getTargetRequests(ctx) {
         const consumer = new Consumer(ctx.state.username)
         const { name } = ctx.query
-        this.logger.debug(name)
         const group = await consumer.view(TargetRequestGroup, name).catch(() => null)
 
         if (!group) {

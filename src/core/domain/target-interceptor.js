@@ -28,7 +28,7 @@ export default class TargetInterceptor extends DomainModel {
      */
     async intercept(context) {
         try {
-            const script = `async ({listener,trigger,props,variables,targetSystem})=>{\
+            const script = `async ({listener,trigger,props,variables,targetSystem,targetRequest})=>{\
             ${this.spec.script};\
             }`
             const { intercept } = await importNamespace(exportName('intercept', script))
