@@ -6,6 +6,9 @@ import Template from "./template.js";
 import SourceInterceptor from "./source-interceptor.js";
 import TargetInterceptor from "./target-interceptor.js";
 import TargetRequest from "./target-request.js";
+import { getLogger } from "koa-es-template";
+
+const logger = getLogger('TRIGGER')
 
 export default class Trigger extends DomainModel {
     static kind = 'trigger'
@@ -73,9 +76,17 @@ export default class Trigger extends DomainModel {
 
     async invoke(context) {
         const sourceIntercepted = await this.#interceptSource(context);
-        if (sourceIntercepted) return
+        if (sourceIntercepted) {
+            logger.debug(this.name, 'intercepted')
+            return
+        }
+        logger.debug(this.name, 'not intercepted')
         const variables = await this.#bindVariables(context);
+        logger.debug(this.name, 'variables', variables)
         const targetRequests = await this.#getTargetRequests(variables['~'])
+
+        logger.debug(this.name, 'target requests', targetRequests)
+
         await this.#triggerAll(targetRequests, { ...context, variables, });
     }
 

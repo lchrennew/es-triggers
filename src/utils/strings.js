@@ -10,7 +10,6 @@ const exec = (string, variables) => {
             return variables[name] ?? ''
         })
 
-    console.log('sssss', string, replaced)
     if (objectPattern.test(string)) return JSON.parse(replaced)
     return replaced
 

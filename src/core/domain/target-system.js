@@ -53,6 +53,7 @@ export class TargetSystem extends DomainModel {
     }
 
     async commit(request, context) {
+        logger.debug('Target Sytem Commit')
         const headers = obj => async (ctx, next) => {
             ctx.headers = { ...ctx.headers, ...obj }
             return next()

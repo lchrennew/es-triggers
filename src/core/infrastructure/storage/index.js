@@ -1,7 +1,7 @@
 import { Cache } from "../cache/index.js";
 import { getLogger } from "koa-es-template";
 
-const logger = getLogger('Storage')
+const logger = getLogger('STORAGE')
 const implement = process.env.MODEL_STORAGE ?? 'in-memory'
 
 logger.debug(`Loading Storage Implement: ${implement}`)
@@ -79,6 +79,7 @@ const fallback = (type, storage = defaultStorage) => path => storage.getByPath(p
 export const getAll = async (type, path = '',
     storage = defaultStorage, cache = defaultCache) => {
     const paths = await storage.getPathsByPath(type, path)
+    logger.debug('get all', type.name, path, paths)
     return cache.getsByPaths(paths, fallback(type, storage), type)
 }
 
