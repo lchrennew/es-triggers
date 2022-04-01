@@ -10,7 +10,7 @@ export default class Index extends Controller {
         super(config);
 
         this.use('/hook', Hook)
-        this.use('/flush', this.flush)
+        this.all('/flush', this.flush)
         this.use('/admin-api', AdminApi)
         this.use('/client-api', ClientApi)
     }
