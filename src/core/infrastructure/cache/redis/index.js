@@ -3,6 +3,11 @@ import { redis } from "../../../../utils/redis.js";
 import { dump, load } from "../../presentation/index.js";
 
 class RedisCache extends Cache {
+    async removeAll() {
+        const keys = await redis.keys('{path}:*')
+        if (keys.length)
+            redis.unlink(...keys)
+    }
 
     getKey(path) {
         return `{path}:${path}`

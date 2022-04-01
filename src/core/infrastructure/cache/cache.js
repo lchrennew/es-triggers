@@ -32,4 +32,8 @@ export default class Cache {
         return delete this.#cache[path];
     }
 
+    async removeAll() {
+        this.#cache = {}
+    }
+
 }
