@@ -12,11 +12,11 @@
     "nodemon": "^2.0.15"
   },
   "dependencies": {
-    "es-fetch-api": "^1.0.25",
+    "es-fetch-api": "^1.0.26",
     "es-ioredis-url": "^1.0.3",
     "es-object-id": "^1.0.0",
     "js-yaml": "^4.1.0",
-    "koa-es-template": "^1.0.20",
+    "koa-es-template": "^1.0.21",
     "node-fetch": "^4.0.0-beta.4",
     "path-to-regexp": "^6.2.0"
   }
