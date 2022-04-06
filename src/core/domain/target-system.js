@@ -15,8 +15,8 @@ const logger = getLogger('TARGET-SYSTEM')
 export class TargetSystem extends DomainModel {
     static kind = 'target-system'
 
-    constructor(name, { title }, { url }) {
-        super(TargetSystem.kind, name, { title }, { url });
+    constructor(name, { title }, spec) {
+        super(TargetSystem.kind, name, { title }, spec);
     }
 
     static #onRequestError(context, error) {
@@ -49,11 +49,11 @@ export class TargetSystem extends DomainModel {
     }
 
     #getUrl(variables) {
-        return exec(this.spec.url, variables)
+        return exec(this.spec[variables['@'] || 'default'], variables)
     }
 
     async commit(request, context) {
-        logger.debug('Target Sytem Commit')
+        logger.debug('Target Sytem Commit:', this.name)
         const headers = obj => async (ctx, next) => {
             ctx.headers = { ...ctx.headers, ...obj }
             return next()
