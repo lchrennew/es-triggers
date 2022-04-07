@@ -6,7 +6,7 @@ import { query } from "es-fetch-api/middlewares/query.js";
 import { json } from "es-fetch-api/middlewares/body.js";
 import TargetSystemRequestedError from "./events/target-system-requested-error.js";
 import TargetSystemRequested from "./events/target-system-requested.js";
-import { useParams } from "../infrastructure/storage/github/clients/index.js";
+import {useParams} from "../../utils/use-params.js";
 import { brokerEnabled } from "../../utils/toggles.js";
 import { getLogger } from "koa-es-template";
 

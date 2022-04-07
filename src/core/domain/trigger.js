@@ -1,5 +1,4 @@
 import { DomainModel } from "./domain-model.js";
-import { get, getAll } from "../infrastructure/storage/index.js";
 import Binding from "./binding.js";
 import { TargetSystem } from "./target-system.js";
 import Template from "./template.js";
@@ -7,6 +6,7 @@ import SourceInterceptor from "./source-interceptor.js";
 import TargetInterceptor from "./target-interceptor.js";
 import TargetRequest from "./target-request.js";
 import { getLogger } from "koa-es-template";
+import { client } from "../infrastructure/cac/client.js";
 
 const logger = getLogger('TRIGGER')
 
@@ -29,7 +29,7 @@ export default class Trigger extends DomainModel {
      * @return {Promise<Binding>}
      */
     async #getBinding() {
-        return this.#binding ??= await get(Binding, this.spec.binding)
+        return this.#binding ??= await client.getOne(Binding.kind, this.spec.binding)
     }
 
     /**
@@ -37,7 +37,7 @@ export default class Trigger extends DomainModel {
      * @return {Promise<TargetSystem>}
      */
     async #getTargetSystem() {
-        return this.#targetSystem ??= await get(TargetSystem, this.spec.targetSystem)
+        return this.#targetSystem ??= await client.getOne(TargetSystem.kind, this.spec.targetSystem)
     }
 
     /**
@@ -45,7 +45,7 @@ export default class Trigger extends DomainModel {
      * @return {Promise<Template>}
      */
     async #getTemplate() {
-        return this.#template ??= await get(Template, this.spec.template)
+        return this.#template ??= await client.getOne(Template.kind, this.spec.template)
     }
 
     /**
@@ -53,7 +53,7 @@ export default class Trigger extends DomainModel {
      * @return {Promise<SourceInterceptor>}
      */
     async #getSourceInterceptor() {
-        return this.#sourceInterceptor ??= await get(SourceInterceptor, this.spec.sourceInterceptor)
+        return this.#sourceInterceptor ??= await client.getOne(SourceInterceptor.kind, this.spec.sourceInterceptor)
     }
 
     /**
@@ -61,7 +61,7 @@ export default class Trigger extends DomainModel {
      * @return {Promise<TargetInterceptor>}
      */
     async #getTargetInterceptor() {
-        return this.#targetInterceptor ??= await get(TargetInterceptor, this.spec.targetInterceptor)
+        return this.#targetInterceptor ??= await client.getOne(TargetInterceptor.kind, this.spec.targetInterceptor)
     }
 
 
@@ -71,7 +71,7 @@ export default class Trigger extends DomainModel {
      * @return {Promise<TargetRequest[]>}
      */
     async #getTargetRequests(namespace = '') {
-        return this.#targetRequests ??= await getAll(TargetRequest, `${this.name}/${namespace}`)
+        return this.#targetRequests ??= await client.find(TargetRequest, `${this.name}/${namespace}`)
     }
 
     async invoke(context) {

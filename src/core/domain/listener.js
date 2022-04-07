@@ -1,8 +1,8 @@
 import { DomainModel } from "./domain-model.js";
-import { getAllByNames } from "../infrastructure/storage/index.js";
 import Trigger from "./trigger.js";
 import TriggerInternalError from "./events/trigger-internal-error.js";
 import { getLogger } from "koa-es-template";
+import { client } from "../infrastructure/cac/client.js";
 
 const logger = getLogger('LISTENER')
 
@@ -23,8 +23,9 @@ export default class Listener extends DomainModel {
      *
      * @return {Promise<Trigger[]>}
      */
-  async  #getTriggers() {
-        const triggers = await getAllByNames(Trigger, this.spec.triggers)
+    async #getTriggers() {
+        const kind = Trigger.kind
+        const triggers = await client.getMultiple({ list: this.spec.triggers.map(name => ({ kind, name })) })
         logger.debug(triggers)
         return triggers
     }

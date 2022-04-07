@@ -12,7 +12,8 @@ export default class Triggers extends Controller {
     async getTriggersByTargetSystem(ctx) {
         const { targetSystem } = ctx.params
         const client = new Client(targetSystem)
-        ctx.body = await client.getTriggers().catch(() => [])
+        ctx.body = await client.getTriggers()
+        // .catch(() => [])
     }
 
 

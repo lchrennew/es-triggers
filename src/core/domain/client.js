@@ -1,5 +1,5 @@
-import {defaultStorage, defaultCache} from "../infrastructure/storage/index.js";
 import Trigger from "./trigger.js";
+import { client } from "../infrastructure/cac/client.js";
 
 export default class Client {
     targetSystem
@@ -12,7 +12,7 @@ export default class Client {
         this.targetSystem = targetSystem;
     }
 
-    async getTriggers(storage = defaultStorage, cache = defaultCache) {
-        return storage.getAll(Trigger, this.targetSystem, storage, cache)
+    getTriggers() {
+        return client.find(Trigger.kind, this.targetSystem)
     }
 }

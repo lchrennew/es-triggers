@@ -1,8 +1,8 @@
 import { Controller } from "koa-es-template";
-import Consumer from "../../core/domain/consumer.js";
 import TargetRequestGroup from "../../core/domain/target-request-group.js";
 import TargetRequest from "../../core/domain/target-request.js";
 import { matches } from "../../utils/objects.js";
+import { client } from "../../core/infrastructure/cac/client.js";
 
 export default class TargetRequestGroups extends Controller {
 
@@ -14,53 +14,51 @@ export default class TargetRequestGroups extends Controller {
     }
 
     async saveGroup(ctx) {
-        const consumer = new Consumer(ctx.state.username)
         const { name } = ctx.query
         const targetRequests = ctx.request.body ?? []
-        const group = await consumer.view(TargetRequestGroup, name).catch(() => null)
-        const newIndex = Object.fromEntries(targetRequests.map(r => [r.name, r]))
+        const group = await client.getOne(TargetRequestGroup.kind, name).catch(() => null)
+        const newIndex = Object.fromEntries(targetRequests.map(r => [ r.name, r ]))
         if (group) {
-            const existing = await consumer.viewByNames(TargetRequest, group.spec.targetRequests)
+            const kind = TargetRequest.kind
+            const existing = await client.getMultiple(group.spec.targetRequests.map(name => ({ kind, name })))
             const removed = existing.filter(r => !newIndex[r.name])
-            const oldIndex = Object.fromEntries(existing.map(r => [r.name, r]))
+            const oldIndex = Object.fromEntries(existing.map(r => [ r.name, r ]))
             const modified = targetRequests.filter(r => !matches(r.spec, oldIndex[r.name]?.spec))
 
             for (const r of removed) {
-                await consumer.deleteByName(TargetRequest, r.name)
+                await client.delete(kind, r.name, ctx.state.username)
             }
             for (const r of modified) {
-                await consumer.save(new TargetRequest(r.name, r.metadata, r.spec))
+                await client.save(new TargetRequest(r.name, r.metadata, r.spec), ctx.state.username)
             }
         } else {
             for (const r of targetRequests) {
-                await consumer.save(new TargetRequest(r.name, r.metadata, r.spec))
+                await client.save(new TargetRequest(r.name, r.metadata, r.spec), ctx.state.username)
             }
         }
 
         const spec = { targetRequests: targetRequests.map(({ name }) => name) }
 
         if (!matches(group?.spec, spec))
-            await consumer.save(new TargetRequestGroup(name, {}, spec))
+            await client.save(new TargetRequestGroup(name, {}, spec), ctx.state.username)
         ctx.body = { ok: true }
     }
 
     async getTargetRequests(ctx) {
-        const consumer = new Consumer(ctx.state.username)
         const { name } = ctx.query
-        const group = await consumer.view(TargetRequestGroup, name).catch(() => null)
+        const group = await client.getOne(TargetRequestGroup, name).catch(() => null)
 
         if (!group) {
             ctx.body = []
             return
         }
-        ctx.body = await consumer.viewByNames(TargetRequest, group.spec.targetRequests)
-
+        const kind = TargetRequest.kind
+        ctx.body = await client.getMultiple(group.spec.targetRequests.map(name => ({ kind, name })))
     }
 
     async deleteGroup(ctx) {
-        const consumer = new Consumer(ctx.state.username)
         const { name } = ctx.query
-        await consumer.deleteByName(TargetRequestGroup.kind, name)
+        await client.delete(TargetRequestGroup.kind, name, ctx.state.username)
         ctx.body = { ok: true }
     }
 }
