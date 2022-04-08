@@ -6,9 +6,11 @@ const isOmit = obj => omits.includes(obj)
 
 export const matches = (o1, o2) => JSON.stringify(o1) === JSON.stringify(o2)
 
-Object.ofType = function (type) {
-    return new type(this);
-}
-Array.prototype.ofType = function (type) {
-    return this.map(item => item.ofType(type));
+export const ofType = (obj, type) => {
+    if (obj instanceof Array)
+        return obj?.map(item => ofType(item, type))
+    else if (obj instanceof Object) {
+        const { name, metadata, spec } = obj
+        return new type(name, metadata, spec)
+    } else return obj
 }

@@ -7,6 +7,7 @@ import TargetInterceptor from "./target-interceptor.js";
 import TargetRequest from "./target-request.js";
 import { getLogger } from "koa-es-template";
 import { client } from "../infrastructure/cac/client.js";
+import { ofType } from "../../utils/objects.js";
 
 const logger = getLogger('TRIGGER')
 
@@ -29,7 +30,7 @@ export default class Trigger extends DomainModel {
      * @return {Promise<Binding>}
      */
     async #getBinding() {
-        return this.#binding ??= (await client.getOne(Binding.kind, this.spec.binding))?.ofType(Binding)
+        return this.#binding ??= ofType(await client.getOne(Binding.kind, this.spec.binding), Binding)
     }
 
     /**
@@ -38,7 +39,7 @@ export default class Trigger extends DomainModel {
      */
     async #getTargetSystem() {
         return this.#targetSystem ??=
-            (await client.getOne(TargetSystem.kind, this.spec.targetSystem))?.ofType(TargetSystem)
+            ofType(await client.getOne(TargetSystem.kind, this.spec.targetSystem), TargetSystem)
     }
 
     /**
@@ -46,7 +47,7 @@ export default class Trigger extends DomainModel {
      * @return {Promise<Template>}
      */
     async #getTemplate() {
-        return this.#template ??= (await client.getOne(Template.kind, this.spec.template))?.ofType(Template)
+        return this.#template ??= ofType(await client.getOne(Template.kind, this.spec.template), Template)
     }
 
     /**
@@ -54,7 +55,8 @@ export default class Trigger extends DomainModel {
      * @return {Promise<SourceInterceptor>}
      */
     async #getSourceInterceptor() {
-        return this.#sourceInterceptor ??= await client.getOne(SourceInterceptor.kind, this.spec.sourceInterceptor)
+        return this.#sourceInterceptor ??=
+            ofType(await client.getOne(SourceInterceptor.kind, this.spec.sourceInterceptor), SourceInterceptor)
     }
 
     /**
@@ -63,7 +65,7 @@ export default class Trigger extends DomainModel {
      */
     async #getTargetInterceptor() {
         return this.#targetInterceptor ??=
-            (await client.getOne(TargetInterceptor.kind, this.spec.targetInterceptor))?.ofType(TargetInterceptor)
+            ofType(await client.getOne(TargetInterceptor.kind, this.spec.targetInterceptor), TargetInterceptor)
     }
 
 
@@ -74,7 +76,7 @@ export default class Trigger extends DomainModel {
      */
     async #getTargetRequests(namespace = '') {
         return this.#targetRequests ??=
-            (await client.find(TargetRequest, `${this.name}/${namespace}`))?.ofType(TargetRequest)
+            ofType(await client.find(TargetRequest.kind, `${this.name}/${namespace}`), TargetRequest)
     }
 
     async invoke(context) {
@@ -99,7 +101,7 @@ export default class Trigger extends DomainModel {
     }
 
     async #interceptSource(context) {
-        const sourceInterceptor = (await this.#getSourceInterceptor())?.ofType(SourceInterceptor)
+        const sourceInterceptor = await this.#getSourceInterceptor()
         return sourceInterceptor.intercept({ ...context, sourceInterceptor: sourceInterceptor.name });
     }
 

@@ -3,6 +3,7 @@ import Trigger from "./trigger.js";
 import TriggerInternalError from "./events/trigger-internal-error.js";
 import { getLogger } from "koa-es-template";
 import { client } from "../infrastructure/cac/client.js";
+import { ofType } from "../../utils/objects.js";
 
 const logger = getLogger('LISTENER')
 
@@ -25,9 +26,9 @@ export default class Listener extends DomainModel {
      */
     async #getTriggers() {
         const kind = Trigger.kind
-        return (await client.getMultiple(
-            { list: this.spec.triggers.map(name => ({ kind, name })) }
-        ))?.ofType(Trigger)
+        return ofType(await client.getMultiple(
+            this.spec.triggers.map(name => ({ kind, name }))
+        ), Trigger)
     }
 
     async invoke(context) {

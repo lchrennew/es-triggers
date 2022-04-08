@@ -4,6 +4,7 @@ import ListenerRequested from "../core/domain/events/listener-requested.js";
 import ListenerInternalError from "../core/domain/events/listener-internal-error.js";
 import ListenerNotFound from "../core/domain/events/listener-not-found.js";
 import { client } from "../core/infrastructure/cac/client.js";
+import { ofType } from "../utils/objects.js";
 
 export default class Hook extends Controller {
 
@@ -26,7 +27,7 @@ export default class Hook extends Controller {
     }
 
     async invokeListener(name, context) {
-        const listener = (await client.getOne(Listener.kind, name).catch(this.onListenerNotFound(context)))?.ofType(Listener)
+        const listener = ofType(await client.getOne(Listener.kind, name).catch(this.onListenerNotFound(context)), Listener)
         listener?.invoke(context).catch(this.onListenerInternalError(context))
     }
 
