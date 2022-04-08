@@ -25,9 +25,9 @@ export default class Listener extends DomainModel {
      */
     async #getTriggers() {
         const kind = Trigger.kind
-        const triggers = await client.getMultiple({ list: this.spec.triggers.map(name => ({ kind, name })) })
-        logger.debug(triggers)
-        return triggers
+        return (await client.getMultiple(
+            { list: this.spec.triggers.map(name => ({ kind, name })) }
+        ))?.ofType(Trigger)
     }
 
     async invoke(context) {

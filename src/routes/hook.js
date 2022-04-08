@@ -26,7 +26,7 @@ export default class Hook extends Controller {
     }
 
     async invokeListener(name, context) {
-        const listener = await client.getOne(Listener.kind, name).catch(this.onListenerNotFound(context))
+        const listener = (await client.getOne(Listener.kind, name).catch(this.onListenerNotFound(context)))?.ofType(Listener)
         listener?.invoke(context).catch(this.onListenerInternalError(context))
     }
 

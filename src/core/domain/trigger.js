@@ -29,7 +29,7 @@ export default class Trigger extends DomainModel {
      * @return {Promise<Binding>}
      */
     async #getBinding() {
-        return this.#binding ??= await client.getOne(Binding.kind, this.spec.binding)
+        return this.#binding ??= (await client.getOne(Binding.kind, this.spec.binding))?.ofType(Binding)
     }
 
     /**
@@ -37,7 +37,8 @@ export default class Trigger extends DomainModel {
      * @return {Promise<TargetSystem>}
      */
     async #getTargetSystem() {
-        return this.#targetSystem ??= await client.getOne(TargetSystem.kind, this.spec.targetSystem)
+        return this.#targetSystem ??=
+            (await client.getOne(TargetSystem.kind, this.spec.targetSystem))?.ofType(TargetSystem)
     }
 
     /**
@@ -45,7 +46,7 @@ export default class Trigger extends DomainModel {
      * @return {Promise<Template>}
      */
     async #getTemplate() {
-        return this.#template ??= await client.getOne(Template.kind, this.spec.template)
+        return this.#template ??= (await client.getOne(Template.kind, this.spec.template))?.ofType(Template)
     }
 
     /**
@@ -61,7 +62,8 @@ export default class Trigger extends DomainModel {
      * @return {Promise<TargetInterceptor>}
      */
     async #getTargetInterceptor() {
-        return this.#targetInterceptor ??= await client.getOne(TargetInterceptor.kind, this.spec.targetInterceptor)
+        return this.#targetInterceptor ??=
+            (await client.getOne(TargetInterceptor.kind, this.spec.targetInterceptor))?.ofType(TargetInterceptor)
     }
 
 
@@ -71,7 +73,8 @@ export default class Trigger extends DomainModel {
      * @return {Promise<TargetRequest[]>}
      */
     async #getTargetRequests(namespace = '') {
-        return this.#targetRequests ??= await client.find(TargetRequest, `${this.name}/${namespace}`)
+        return this.#targetRequests ??=
+            (await client.find(TargetRequest, `${this.name}/${namespace}`))?.ofType(TargetRequest)
     }
 
     async invoke(context) {
@@ -96,7 +99,7 @@ export default class Trigger extends DomainModel {
     }
 
     async #interceptSource(context) {
-        const sourceInterceptor = await this.#getSourceInterceptor()
+        const sourceInterceptor = (await this.#getSourceInterceptor())?.ofType(SourceInterceptor)
         return sourceInterceptor.intercept({ ...context, sourceInterceptor: sourceInterceptor.name });
     }
 

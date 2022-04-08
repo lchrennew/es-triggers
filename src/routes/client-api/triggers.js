@@ -13,7 +13,10 @@ export default class Triggers extends Controller {
         const { targetSystem } = ctx.params
         const client = new Client(targetSystem)
         ctx.body = await client.getTriggers()
-        // .catch(() => [])
+            .catch(error => {
+                this.logger.error(error)
+                return []
+            })
     }
 
 
