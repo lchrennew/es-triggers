@@ -22,8 +22,15 @@ export default class Hook extends Controller {
 
         const context = { listener: name, method, query, headers, body }
         const eventID = this.onRequestIn(context);
-        this.invokeListener(name, { ...context, eventID }).catch(() => false);
-        ctx.body = { ok: true, eventID }
+
+        ctx.body = {
+            ok: await this.invokeListener(name, { ...context, eventID })
+                .catch(error => {
+                    this.logger.error(error)
+                    return false
+                }),
+            eventID,
+        }
     }
 
     async invokeListener(name, context) {

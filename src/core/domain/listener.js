@@ -1,9 +1,9 @@
-import { DomainModel } from "./domain-model.js";
 import Trigger from "./trigger.js";
 import TriggerInternalError from "./events/trigger-internal-error.js";
 import { getLogger } from "koa-es-template";
 import { client } from "../infrastructure/cac/client.js";
 import { ofType } from "../../utils/objects.js";
+import { DomainModel } from "es-configuration-as-code-client";
 
 const logger = getLogger('LISTENER')
 

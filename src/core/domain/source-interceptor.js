@@ -1,7 +1,7 @@
-import { DomainModel } from "./domain-model.js";
 import { exportName, importNamespace } from "../../utils/imports.js";
 import SourceRequestIntercepted from "./events/source-request-intercepted.js";
 import SourceInterceptorInternalError from "./events/source-interceptor-internal-error.js";
+import { DomainModel } from "es-configuration-as-code-client";
 
 export default class SourceInterceptor extends DomainModel {
     static kind = 'source-interceptor'

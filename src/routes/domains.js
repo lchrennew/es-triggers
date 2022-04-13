@@ -29,8 +29,9 @@ class Domains extends Controller {
     async save(ctx) {
         const { name } = ctx.params
         const { metadata, spec } = ctx.request.body
-        const type = this.type
-        await this.client.save({ kind: type.kind, name, metadata, spec }, ctx.state.username)
+        const { operator } = ctx.headers
+        const kind = this.type.kind
+        await this.client.save({ kind, name, metadata, spec }, operator)
         ctx.body = { ok: true }
     }
 

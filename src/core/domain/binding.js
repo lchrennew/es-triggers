@@ -1,6 +1,6 @@
-import { DomainModel } from "./domain-model.js";
 import { exportName, importNamespace } from "../../utils/imports.js";
 import BindingInternalError from "./events/binding-internal-error.js";
+import { DomainModel } from "es-configuration-as-code-client";
 
 export default class Binding extends DomainModel {
 

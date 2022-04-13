@@ -1,7 +1,7 @@
-import { DomainModel } from "./domain-model.js";
 import { exportName, importNamespace } from "../../utils/imports.js";
 import TargetRequestIntercepted from "./events/target-request-intercepted.js";
 import TargetInterceptorInternalError from "./events/target-interceptor-internal-error.js";
+import { DomainModel } from "es-configuration-as-code-client";
 
 
 export default class TargetInterceptor extends DomainModel {

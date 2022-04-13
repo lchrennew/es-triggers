@@ -1,4 +1,3 @@
-import { DomainModel } from "./domain-model.js";
 import { exec } from "../../utils/strings.js";
 import { getApi } from "es-fetch-api";
 import { POST } from "es-fetch-api/middlewares/methods.js";
@@ -9,6 +8,7 @@ import TargetSystemRequested from "./events/target-system-requested.js";
 import {useParams} from "../../utils/use-params.js";
 import { brokerEnabled } from "../../utils/toggles.js";
 import { getLogger } from "koa-es-template";
+import { DomainModel } from "es-configuration-as-code-client";
 
 const logger = getLogger('TARGET-SYSTEM')
 

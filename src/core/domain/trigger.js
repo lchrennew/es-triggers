@@ -1,4 +1,3 @@
-import { DomainModel } from "./domain-model.js";
 import Binding from "./binding.js";
 import { TargetSystem } from "./target-system.js";
 import Template from "./template.js";
@@ -8,6 +7,7 @@ import TargetRequest from "./target-request.js";
 import { getLogger } from "koa-es-template";
 import { client } from "../infrastructure/cac/client.js";
 import { ofType } from "../../utils/objects.js";
+import { DomainModel } from "es-configuration-as-code-client";
 
 const logger = getLogger('TRIGGER')
 

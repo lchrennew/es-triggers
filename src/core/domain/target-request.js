@@ -1,7 +1,7 @@
-import { DomainModel } from "./domain-model.js";
 import { exportName, importNamespace } from "../../utils/imports.js";
 import TargetRequestInternalError from "./events/target-request-internal-error.js";
 import { getLogger } from "koa-es-template";
+import { DomainModel } from "es-configuration-as-code-client";
 
 const logger = getLogger('target-request.js')
 

@@ -1,6 +1,6 @@
-import { DomainModel } from "./domain-model.js";
 import { exec } from "../../utils/strings.js";
 import { traversal } from "../../utils/traversal.js";
+import { DomainModel } from "es-configuration-as-code-client";
 
 export default class Template extends DomainModel {
     static kind = 'template'

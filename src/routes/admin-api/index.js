@@ -6,9 +6,9 @@ import Template from "../../core/domain/template.js";
 import Binding from "../../core/domain/binding.js";
 import SourceInterceptor from "../../core/domain/source-interceptor.js";
 import TargetInterceptor from "../../core/domain/target-interceptor.js";
-import { format } from "../../core/infrastructure/presentation/index.js";
 import Triggers from "./triggers.js";
 
+const format = process.env.PRESENTATION_FORMAT ?? 'yaml'
 export default class AdminApi extends Controller {
 
     constructor(config) {
