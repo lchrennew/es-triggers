@@ -12,8 +12,8 @@
     "nodemon": "^2.0.15"
   },
   "dependencies": {
-    "es-configuration-as-code-client": "^1.0.3",
-    "es-fetch-api": "^1.0.26",
+    "es-configuration-as-code-client": "^1.0.4",
+    "es-fetch-api": "^1.0.27",
     "es-ioredis-url": "^1.0.3",
     "es-object-id": "^1.0.0",
     "koa-es-template": "^1.0.22",

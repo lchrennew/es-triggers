@@ -18,6 +18,11 @@ export default class TargetRequestGroups extends Controller {
         const targetRequests = ctx.request.body ?? []
         const group = await client.getOne(TargetRequestGroup.kind, name).catch(() => null)
         const newIndex = Object.fromEntries(targetRequests.map(r => [ r.name, r ]))
+
+        const changeSet = {
+            deleted: [],
+            saved: [],
+        }
         if (group) {
             const kind = TargetRequest.kind
             const existing = await client.getMultiple(group.spec.targetRequests.map(name => ({ kind, name })))
@@ -26,21 +31,23 @@ export default class TargetRequestGroups extends Controller {
             const modified = targetRequests.filter(r => !matches(r.spec, oldIndex[r.name]?.spec))
 
             for (const r of removed) {
-                await client.delete(kind, r.name, ctx.state.username)
+                changeSet.deleted.push({ kind, name: r.name })
             }
             for (const r of modified) {
-                await client.save(new TargetRequest(r.name, r.metadata, r.spec), ctx.state.username)
+                changeSet.saved.push(new TargetRequest(r.name, r.metadata, r.spec))
             }
         } else {
             for (const r of targetRequests) {
-                await client.save(new TargetRequest(r.name, r.metadata, r.spec), ctx.state.username)
+                changeSet.saved.push(new TargetRequest(r.name, r.metadata, r.spec))
             }
         }
 
         const spec = { targetRequests: targetRequests.map(({ name }) => name) }
 
-        if (!matches(group?.spec, spec))
-            await client.save(new TargetRequestGroup(name, {}, spec), ctx.state.username)
+        if (!matches(group?.spec, spec)) {
+            changeSet.saved.push(new TargetRequestGroup(name, {}, spec))
+        }
+        await client.submit(changeSet, ctx.state.username)
         ctx.body = { ok: true }
     }
 
