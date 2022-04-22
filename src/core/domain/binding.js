@@ -1,7 +1,11 @@
 import { exportName, importNamespace } from "../../utils/imports.js";
 import BindingInternalError from "./events/binding-internal-error.js";
 import { DomainModel } from "es-configuration-as-code-client";
+import { getLogger } from "koa-es-template";
+import BindingBound from "./events/bindingBound.js";
+import BindingBinding from "./events/binding-binding.js";
 
+const logger = getLogger('BINDING')
 export default class Binding extends DomainModel {
 
     static kind = 'binding'
@@ -10,19 +14,29 @@ export default class Binding extends DomainModel {
         super(Binding.kind, name, metadata, { script });
     }
 
-    static #onError(sourceEvent, error) {
-        const bindingInternalError = new BindingInternalError(sourceEvent, error)
-        bindingInternalError.flush()
-    }
+    async bind(context) {
+        const bindingBinding = new BindingBinding(this, ...context.chain)
+        bindingBinding.flush()
+        context.binding = this.name
+        context.chain = [ ...context.chain, bindingBinding.eventID ]
 
-    async bind(sourceEvent) {
         try {
+
             const script = `async ({ listener, trigger, method, query, headers, body, eventID })=>\
         { const variables={}; ${this.spec.script}; return variables; }`
             const { bind } = await importNamespace(exportName('bind', script))
-            return await bind(sourceEvent)
+            const variables = await bind(context)
+
+            logger.debug('variables = ', variables)
+
+            const bindingBound = new BindingBound(variables, ...context.chain)
+            bindingBound.flush()
+
+            return bindingBound
         } catch (error) {
-            Binding.#onError(sourceEvent, error);
+            logger.error(error)
+            const bindingInternalError = new BindingInternalError(error, ...context.chain)
+            bindingInternalError.flush()
         }
     }
 }

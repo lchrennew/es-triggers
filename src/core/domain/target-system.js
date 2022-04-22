@@ -3,12 +3,13 @@ import { getApi } from "es-fetch-api";
 import { POST } from "es-fetch-api/middlewares/methods.js";
 import { query } from "es-fetch-api/middlewares/query.js";
 import { json } from "es-fetch-api/middlewares/body.js";
-import TargetSystemRequestedError from "./events/target-system-requested-error.js";
-import TargetSystemRequested from "./events/target-system-requested.js";
-import {useParams} from "../../utils/use-params.js";
+import TargetSystemInternalError from "./events/target-system-internal-error.js";
+import TargetSystemResponded from "./events/target-system-responded.js";
+import { useParams } from "../../utils/use-params.js";
 import { brokerEnabled } from "../../utils/toggles.js";
 import { getLogger } from "koa-es-template";
 import { DomainModel } from "es-configuration-as-code-client";
+import TargetSystemRequesting from "./events/target-system-requesting.js";
 
 const logger = getLogger('TARGET-SYSTEM')
 
@@ -19,18 +20,18 @@ export class TargetSystem extends DomainModel {
         super(TargetSystem.kind, name, { title }, spec);
     }
 
-    static #onRequestError(context, error) {
-        const targetSystemRequestedError = new TargetSystemRequestedError(context, error)
-        targetSystemRequestedError.flush()
+    static #onError(context, error) {
+        const targetSystemInternalError = new TargetSystemInternalError(context, error)
+        targetSystemInternalError.flush()
     }
 
     static async #onFinished(context, result) {
-        const targetSystemRequested = new TargetSystemRequested(context, result)
-        targetSystemRequested.flush()
+        const targetSystemResponded = new TargetSystemResponded(context, result)
+        targetSystemResponded.flush()
+        context.chain = [ ...context.chain, targetSystemResponded.eventID ]
         if (brokerEnabled && context.query?.session) {
             const brokerApi = getApi(process.env.SOCKJS_BROKER_API)
-            brokerApi('publish/:topic', useParams({ topic: context.query.session }), POST, json(result.response))
-                .catch(error => logger.error(error))
+            await brokerApi('publish/:topic', useParams({ topic: context.query.session }), POST, json(result.response))
         }
     }
 
@@ -62,6 +63,10 @@ export class TargetSystem extends DomainModel {
             const baseURL = this.#getUrl(context.variables)
             const api = getApi(baseURL)
 
+            const targetSystemRequesting = new TargetSystemRequesting({ ...request, baseURL }, ...context.chain)
+            targetSystemRequesting.flush()
+            context.chain = [ ...context.chain, targetSystemRequesting.eventID ]
+
             const apiResponse =
                 await api(
                     request.path,
@@ -74,7 +79,8 @@ export class TargetSystem extends DomainModel {
             const response = await TargetSystem.#responseToObject(apiResponse);
             await TargetSystem.#onFinished(context, { baseURL, request, response })
         } catch (error) {
-            TargetSystem.#onRequestError(context, error);
+            const targetSystemInternalError = new TargetSystemInternalError(context, error)
+            targetSystemInternalError.flush()
         }
     }
 }

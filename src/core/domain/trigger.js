@@ -8,6 +8,8 @@ import { getLogger } from "koa-es-template";
 import { client } from "../infrastructure/cac/client.js";
 import { ofType } from "../../utils/objects.js";
 import { DomainModel } from "es-configuration-as-code-client";
+import TriggerInternalError from "./events/trigger-internal-error.js";
+import TriggerInvoked from "./events/trigger-invoked.js";
 
 const logger = getLogger('TRIGGER')
 
@@ -80,29 +82,39 @@ export default class Trigger extends DomainModel {
     }
 
     async invoke(context) {
-        const sourceIntercepted = await this.#interceptSource(context);
-        if (sourceIntercepted) {
-            logger.debug(this.name, 'intercepted')
-            return
+        const triggerInvoked = new TriggerInvoked(this, ...context.chain)
+        triggerInvoked.flush()
+        context.chain = [ ...context.chain, triggerInvoked.eventID ]
+
+        try {
+            const sourceIntercepted = await this.#interceptSource(context);
+            if (!sourceIntercepted?.content.passed) return
+
+            context.chain = [ ...context.chain, sourceIntercepted.eventID ]
+            const bindingBound = await this.#bindVariables(context);
+            if (!bindingBound) return
+
+            const variables = bindingBound.content
+            context.chain = [ ...context.chain, bindingBound.eventID ]
+            const targetRequests = await this.#getTargetRequests(variables['~'])
+            logger.debug(this.name, 'target requests', targetRequests)
+
+            await this.#triggerAll(targetRequests, context);
+        } catch (error) {
+            logger.error(error)
+            const triggerInternalError = new TriggerInternalError(error, ...context.chain)
+            triggerInternalError.flush()
         }
-        logger.debug(this.name, 'not intercepted')
-        const variables = await this.#bindVariables(context);
-        logger.debug(this.name, 'variables', variables)
-        const targetRequests = await this.#getTargetRequests(variables['~'])
-
-        logger.debug(this.name, 'target requests', targetRequests)
-
-        await this.#triggerAll(targetRequests, { ...context, variables, });
     }
 
     async #bindVariables(context) {
         const binding = await this.#getBinding()
-        return await binding.bind({ ...context, binding: binding.name, });
+        return await binding.bind(context);
     }
 
     async #interceptSource(context) {
         const sourceInterceptor = await this.#getSourceInterceptor()
-        return sourceInterceptor.intercept({ ...context, sourceInterceptor: sourceInterceptor.name });
+        return await sourceInterceptor.intercept({ ...context, sourceInterceptor: sourceInterceptor.name });
     }
 
     async #triggerAll(targetRequests, context) {
@@ -111,20 +123,7 @@ export default class Trigger extends DomainModel {
         const template = await this.#getTemplate()
 
         targetRequests.forEach(
-            targetRequest =>
-                targetRequest.trigger(
-                    {
-                        ...context,
-                        props: targetRequest.spec.props,
-                        targetRequest: targetRequest.name,
-                        targetInterceptor: targetInterceptor.name,
-                        targetSystem: targetSystem.name,
-                        template: template.name,
-                    },
-                    targetInterceptor,
-                    targetSystem,
-                    template,
-                ))
+            targetRequest => targetRequest.trigger(context, targetInterceptor, targetSystem, template,))
     }
 
 }

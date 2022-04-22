@@ -1,17 +1,18 @@
 import { getLogger } from "koa-es-template";
 import { generateObjectID } from "es-object-id";
+import { redis } from "../../../utils/redis.js";
+
 
 const logger = getLogger('DOMAIN_EVENT')
 export default class DomainEvent {
     eventID = generateObjectID()
+
+    chain = [];
     content;
 
-    constructor(content) {
+    constructor(content, ...chain) {
         this.content = content;
-    }
-
-    get keys() {
-        return []
+        this.chain = chain
     }
 
     get type() {
@@ -19,7 +20,10 @@ export default class DomainEvent {
     }
 
     flush() {
-        logger.info(this.constructor.name, this.eventID, this.content?.eventID)
-        // logger.info(JSON.stringify({ ID: this.eventID, TYPE: this.type, CONTENT: this.content }, null, 4))
+        const key = `{trigger-event}:${this.chain[0] || this.eventID}`
+        const field = [ ...this.chain, this.eventID ].join('/')
+        const value = JSON.stringify(this)
+        redis.hset(key, field, value)
+        logger.info(this.constructor.name, this.chain)
     }
 }
