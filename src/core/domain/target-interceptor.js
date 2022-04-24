@@ -13,16 +13,6 @@ export default class TargetInterceptor extends DomainModel {
         super(TargetInterceptor.kind, name, { title }, { script });
     }
 
-    static #onError(context, error) {
-        const targetInterceptorInternalError = new TargetInterceptorInternalError(context, error)
-        targetInterceptorInternalError.flush()
-    }
-
-    static #onIntercepted(context) {
-        const targetRequestIntercepted = new TargetRequestIntercepted(context)
-        targetRequestIntercepted.flush()
-    }
-
     /**
      *
      * @param context

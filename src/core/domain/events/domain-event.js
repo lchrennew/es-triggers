@@ -24,6 +24,6 @@ export default class DomainEvent {
         const field = [ ...this.chain, this.eventID ].join('/')
         const value = JSON.stringify(this)
         redis.hset(key, field, value)
-        logger.info(this.constructor.name, this.chain)
+        logger.info(this.constructor.name, field)
     }
 }

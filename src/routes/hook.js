@@ -3,7 +3,7 @@ import Listener from "../core/domain/listener.js";
 import ListenerNotFound from "../core/domain/events/listener-not-found.js";
 import { client } from "../core/infrastructure/cac/client.js";
 import { ofType } from "../utils/objects.js";
-import { RequestReceived } from "../core/domain/events/request-received.js";
+import RequestReceived from "../core/domain/events/request-received.js";
 import ListenerInvoked from "../core/domain/events/listener-invoked.js";
 
 export default class Hook extends Controller {
@@ -60,11 +60,5 @@ export default class Hook extends Controller {
             listenerInvoked.flush()
             await listener.invoke({ ...context, chain: [ ...context.chain, listenerInvoked.eventID ] })
         }
-    }
-
-    onRequestIn(context) {
-        const requestReceived = new RequestReceived(context)
-        requestReceived.flush()
-        return requestReceived
     }
 }

@@ -1,5 +1,5 @@
 import DomainEvent from "./domain-event.js";
 
-export class RequestReceived extends DomainEvent {
+export default class RequestReceived extends DomainEvent {
 
 }

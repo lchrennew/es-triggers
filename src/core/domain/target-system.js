@@ -20,11 +20,6 @@ export class TargetSystem extends DomainModel {
         super(TargetSystem.kind, name, { title }, spec);
     }
 
-    static #onError(context, error) {
-        const targetSystemInternalError = new TargetSystemInternalError(context, error)
-        targetSystemInternalError.flush()
-    }
-
     static async #onFinished(context, result) {
         const targetSystemResponded = new TargetSystemResponded(context, result)
         targetSystemResponded.flush()
@@ -79,7 +74,7 @@ export class TargetSystem extends DomainModel {
             const response = await TargetSystem.#responseToObject(apiResponse);
             await TargetSystem.#onFinished(context, { baseURL, request, response })
         } catch (error) {
-            const targetSystemInternalError = new TargetSystemInternalError(context, error)
+            const targetSystemInternalError = new TargetSystemInternalError(error, ...context.chain)
             targetSystemInternalError.flush()
         }
     }
