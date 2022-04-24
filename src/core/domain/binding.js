@@ -26,7 +26,7 @@ export default class Binding extends DomainModel {
         { const variables={}; ${this.spec.script}; return variables; }`
             const { bind } = await importNamespace(exportName('bind', script))
             const variables = await bind(context)
-
+            context.variables = variables
             logger.debug('variables = ', variables)
 
             const bindingBound = new BindingBound(variables, ...context.chain)

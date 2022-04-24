@@ -21,7 +21,7 @@ export class TargetSystem extends DomainModel {
     }
 
     static async #onFinished(context, result) {
-        const targetSystemResponded = new TargetSystemResponded(context, result)
+        const targetSystemResponded = new TargetSystemResponded(result, ...context.chain)
         targetSystemResponded.flush()
         context.chain = [ ...context.chain, targetSystemResponded.eventID ]
         if (brokerEnabled && context.query?.session) {
@@ -49,7 +49,6 @@ export class TargetSystem extends DomainModel {
     }
 
     async commit(request, context) {
-        logger.info('Target Sytem Commit:', this.name)
         const headers = obj => async (ctx, next) => {
             ctx.headers = { ...ctx.headers, ...obj }
             return next()
