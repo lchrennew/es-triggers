@@ -9,14 +9,12 @@ export default class DomainEvent {
 
     chain = [];
     content;
+    type;
 
     constructor(content, ...chain) {
         this.content = content;
         this.chain = chain
-    }
-
-    get type() {
-        return this.constructor.name
+        this.type = this.constructor.name
     }
 
     flush() {

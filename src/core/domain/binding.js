@@ -2,7 +2,7 @@ import { exportName, importNamespace } from "../../utils/imports.js";
 import BindingInternalError from "./events/binding-internal-error.js";
 import { DomainModel } from "es-configuration-as-code-client";
 import { getLogger } from "koa-es-template";
-import BindingBound from "./events/bindingBound.js";
+import BindingBound from "./events/binding-bound.js";
 import BindingBinding from "./events/binding-binding.js";
 
 const logger = getLogger('BINDING')

@@ -78,7 +78,7 @@ export default class Trigger extends DomainModel {
      */
     async #getTargetRequests(namespace = '') {
         return this.#targetRequests ??=
-            ofType(await client.find(TargetRequest.kind, `${this.name}/${namespace}`), TargetRequest)
+            ofType(await client.find(TargetRequest.kind, `${this.name}${namespace}`), TargetRequest)
     }
 
     async invoke(context) {
@@ -97,7 +97,7 @@ export default class Trigger extends DomainModel {
             const variables = bindingBound.content
             context.chain = [ ...context.chain, bindingBound.eventID ]
             const targetRequests = await this.#getTargetRequests(variables['~'])
-            logger.debug(this.name, 'target requests', targetRequests)
+            logger.debug(this.name, 'target requests', variables['~'], targetRequests)
 
             await this.#triggerAll(targetRequests, context);
         } catch (error) {

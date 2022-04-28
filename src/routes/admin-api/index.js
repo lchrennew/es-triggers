@@ -7,6 +7,7 @@ import Binding from "../../core/domain/binding.js";
 import SourceInterceptor from "../../core/domain/source-interceptor.js";
 import TargetInterceptor from "../../core/domain/target-interceptor.js";
 import Triggers from "./triggers.js";
+import Events from "./events.js";
 
 const format = process.env.PRESENTATION_FORMAT ?? 'yaml'
 export default class AdminApi extends Controller {
@@ -22,5 +23,7 @@ export default class AdminApi extends Controller {
         this.use('/target-interceptors', Domain(TargetInterceptor))
 
         this.get('/config', async ctx => ctx.body = { format })
+
+        this.use('/events', Events)
     }
 }

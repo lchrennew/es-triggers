@@ -37,6 +37,7 @@ export default class Hook extends Controller {
                 }),
             Listener
         )
+
         const context = { listener: name, method, query, headers, body, eventID, chain: [ eventID ] }
         await listener.invoke(context)
         ctx.body = {
