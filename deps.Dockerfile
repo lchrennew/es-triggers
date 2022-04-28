@@ -1,3 +1,3 @@
-FROM node:17.0-alpine3.13
+FROM node:18-alpine
 COPY package.json build.sh start.sh ./
 RUN sh build.sh
