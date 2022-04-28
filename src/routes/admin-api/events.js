@@ -15,16 +15,13 @@ export default class Events extends Controller {
         const keys = Object.keys(result).sort()
         const rootEvent = JSON.parse(result[keys.shift()])
 
-        ctx.body = keys.reduce((acc, cur) => {
-            const path = cur.split('/')
-            let node = acc
-            for (const dir of path) {
-                node.subsequences ??= {}
-                node.subsequences[dir] ??= JSON.parse(result[cur])
-                node = node.subsequences[dir]
-            }
-            return acc
-        }, rootEvent)
+        ctx.body = rootEvent
+        keys.forEach(key => {
+            let node = rootEvent
+            const [ , ...path ] = key.split('/')
+            path.forEach(dir => node = ((node.subsequences ??= {})[dir] ??= JSON.parse(result[key])))
+        })
+
         ctx.status = 200
     }
 }

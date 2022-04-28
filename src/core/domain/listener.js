@@ -6,6 +6,7 @@ import { ofType } from "../../utils/objects.js";
 import { DomainModel } from "es-configuration-as-code-client";
 import ListenerInternalError from "./events/listener-internal-error.js";
 import TriggerInvoked from "./events/trigger-invoked.js";
+import ListenerInvoked from "./events/listener-invoked.js";
 
 const logger = getLogger('LISTENER')
 
@@ -34,12 +35,15 @@ export default class Listener extends DomainModel {
     }
 
     async invoke(context) {
+        const listenerInvoked = new ListenerInvoked(this, ...context.chain)
+        listenerInvoked.flush()
         try {
             const triggers = await this.#getTriggers()
             triggers.forEach(
                 trigger => {
                     trigger.invoke({
                         ...context,
+                        chain: [ ...context.chain, listenerInvoked.eventID ],
                         trigger: trigger.name
                     })
                 }
